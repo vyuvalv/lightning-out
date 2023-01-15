@@ -57,6 +57,38 @@ export default class App extends LightningElement {
         // this.loadRecords();
         console.log('app path ' + this.pathName);
     }
+    renderLightningOut() {
+        // const element = this.template.querySelector('.lightning-out');
+        // const divId = 'lightning-out';
+        window.postMessage(
+            {
+                accessToken: this.accessToken,
+                instanceUrl: this.instanceUrl
+            },
+            'http://localhost:3001'
+        );
+        // lexDiv.use("c:actionsApp", () => {
+        //     lexDiv.createComponent("c:actionsContainer", {
+        //                                                         "sObjectName":"RouteAction__c",
+        //                                                         "recordId":'a000C000005eKXRQA2',
+        //                                                         "displayType":"VerticalNavigation",
+        //                                                         "isAdmin":true,
+        //                                                         "rtl":false,
+        //                                                         "usedAsScreen":false,
+        //                                                         "sortOrder":"asc",
+        //                                                         "fromOrder":1,
+        //                                                         "toOrder":100,
+        //                                                         "pageSize":5,
+        //                                                         "componentId":3
+        //                                                         },
+        //                                                         divId,
+        //                                                         function(cmp) {
+        //                                                                 console.log('component created');
+        //                                                                 console.log(cmp);
+        //                                                             });
+
+        //                                                     }, "https://business-computing-1495-dev-ed.scratch.lightning.force.com/", this.accessToken);
+    }
 
     loadRecords() {
         // fetch data

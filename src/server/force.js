@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 const jsforce = require('jsforce');
 const dotenv = require('dotenv');
 dotenv.config();
@@ -94,5 +95,6 @@ const query = (req, res, soql) => {
     });
 };
 
-// eslint-disable-next-line no-undef
-exports.sfdx = { login, query, create };
+exports.login = login;
+exports.query = query;
+exports.create = create;

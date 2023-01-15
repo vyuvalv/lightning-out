@@ -27,3 +27,8 @@ Thumbs.db
 ehthumbs.db
 [Dd]esktop.ini
 $RECYCLE.BIN/
+
+src/client/resources/assets
+package-lock.json
+.gitignore
+.env
