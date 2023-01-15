@@ -1,0 +1,373 @@
+<template>
+    <!-- New Event MODAL -->
+    <c-modal
+        if:true={openDetailsModal}
+        header="Event"
+        size="small"
+        onclosemodal={onCloseModal}
+    >
+        <div slot="body">
+            <c-calendar-event event-slot={selectedSlot}></c-calendar-event>
+        </div>
+        <div slot="footer">
+            <lightning-button
+                variant="destructive"
+                label="Close"
+                onclick={onCloseModal}
+                icon-name="utility:close"
+                icon-position="left"
+            ></lightning-button>
+            <lightning-button
+                variant="brand"
+                label="Save"
+                onclick={onSaveNewEvent}
+                icon-name="utility:save"
+                icon-position="left"
+            ></lightning-button>
+        </div>
+    </c-modal>
+
+    <div class="master-container slds-p-around_x-small slds-scrollable_x">
+        <!-- Headers Row-->
+        <div class="calendarDays-container slds-grid">
+            <div
+                class="slds-col slds-size_1-of-12 slds-align-bottom slds-text-align_center"
+            >
+                X {numberOfDays}
+                <lightning-button-icon
+                    class="slds-p-around_small"
+                    size="small"
+                    name="test"
+                    icon-name="utility:preview"
+                    onclick={placeEvents}
+                ></lightning-button-icon>
+            </div>
+
+            <div class="slds-col slds-size_11-of-12">
+                <div class="slds-grid day-label-block">
+                    <!-- Days Headers -->
+                    <template for:each={calendarDays} for:item="day">
+                        <!-- Day -->
+                        <div
+                            key={day.value}
+                            class="slds-size_1-of-7 slds-theme_default slds-box_border slds-text-align_center slds-text-heading_medium"
+                        >
+                            <div class="slds-text-align_center">
+                                <p class="slds-text-title_bold">{day.label}</p>
+                                <p class={day.className}>{day.name}</p>
+                                <p
+                                    class="slds-text-body_small slds-m-around_xx-small"
+                                >
+                                    {day.formmatedValue}
+                                </p>
+                            </div>
+                            <!-- All Day slots -->
+                            <div
+                                class="cal-time-slot-selectable-box slds-border_bottom slds-border_top"
+                            >
+                                <div
+                                    class="cal-time-slot-label slds-p-horizontal_xx-small slds-text-align_left"
+                                >
+                                    {day.label}
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+
+        <!-- slots view -->
+        <div
+            class="timeslots-container slds-m-top_small slds-grid slds-scrollable_y"
+            onscroll={onVerticalScroll}
+        >
+            <!-- static vertical slot units-->
+            <div class="slds-col slds-size_1-of-12 slds-is-relative">
+                <div class="vertical-timeline-slots slds-border_right">
+                    <template for:each={timeSlots} for:item="slot">
+                        <div key={slot.value} class="vertical-timeline-row">
+                            <!--  time slot values -->
+                            <div
+                                class="cal-time-slot-box slds-border_bottom slds-border_top"
+                            >
+                                <p
+                                    class="cal-time-slot-label slds-p-horizontal_xx-small slds-text-align_right"
+                                >
+                                    {slot.label}
+                                </p>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+            <!-- All Days Slots Grid-->
+            <div
+                class="slds-col slds-size_11-of-12 slds-is-relative timeslots-grid"
+            >
+                <div class="slds-grid slds-border_bottom" data-name="container">
+                    <!-- GRID -->
+                    <template
+                        for:each={calendarDays}
+                        for:item="day"
+                        for:index="columnIndex"
+                    >
+                        <div
+                            key={day.value}
+                            class="slds-size_1-of-7 slds-text-align_center slds-text-heading_medium day-container calendar-droppable-zone"
+                            data-name="column"
+                            data-day-index={columnIndex}
+                            data-day={day.date}
+                            ondragenter={handleEnteredSlot}
+                        >
+                            <div
+                                class="selectable-vertical-timeline-slots slds-border_right"
+                                data-name="grid"
+                            >
+                                <template
+                                    for:each={timeSlots}
+                                    for:item="slot"
+                                    for:index="slotIndex"
+                                >
+                                    <!-- Allow to select slots for creating new Events -->
+                                    <div
+                                        key={slot.value}
+                                        class="cal-time-slot"
+                                        data-start={slot.start}
+                                        data-end={slot.end}
+                                        data-total="30"
+                                        data-day={day.date}
+                                        data-day-index={columnIndex}
+                                        data-index={slotIndex}
+                                        data-name="timeSlot"
+                                        draggable="true"
+                                        onmouseover={handleTimeSlotMouseOver}
+                                        onmouseout={handleTimeSlotMouseOut}
+                                        ondragstart={handleStartDrag}
+                                        ondragend={handleEventSlotDragEnd}
+                                    >
+                                        <!--  empty time slots -->
+                                        <div
+                                            class="cal-time-slot-selectable-box slds-border_bottom slds-border_top"
+                                            data-name="emptySlot"
+                                        >
+                                            <div
+                                                class="cal-time-slot-label slds-p-horizontal_xx-small slds-text-align_left"
+                                                data-name="slotLabel"
+                                            >
+                                                {slot.label}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+                    </template>
+                    <!-- END GRID -->
+
+                    <!-- Data Event Slots-->
+                    <template
+                        if:true={events.length}
+                        for:each={events}
+                        for:item="event"
+                        for:index="eventIndex"
+                    >
+                        <!-- Event Block -->
+                        <div
+                            key={event.id}
+                            class="slds-size_1-of-7 slds-is-absolute cal-time-slot-event calendar-droppable-zone"
+                            data-name="eventItem"
+                            data-id={event.id}
+                            data-start={event.top}
+                            data-end={event.bottom}
+                            data-total={event.totalTimeInMinutes}
+                            data-day-index={event.dayIndex}
+                            data-day={event.startDate}
+                            onclick={handleSelected}
+                            ondragenter={handleEnteredSlot}
+                            tabindex={eventIndex}
+                            onkeydown={handleKeyPress}
+                            onkeyup={handleKeyUp}
+                        >
+                            <!-- Event Handler for Resize Top -->
+                            <div
+                                if:true={event.selected}
+                                class="dragged-up-button"
+                                draggable="true"
+                                data-id={event.id}
+                                data-name="top"
+                                ondblclick={hanldeDBClick}
+                                ondragstart={handleStartDrag}
+                                ondragend={handleEventSlotDragEnd}
+                            ></div>
+
+                            <!-- Details Box -->
+                            <div
+                                class="event-slot-detail-box slds-size_1-of-1 slds-scrollable_y"
+                                draggable="true"
+                                data-id={event.id}
+                                data-name="move"
+                                ondblclick={hanldeDBClick}
+                                ondragstart={handleStartDrag}
+                                ondragend={handleEventSlotDragEnd}
+                            >
+                                <!-- Left Edge -->
+                                <div
+                                    class={event.className}
+                                    data-name="left"
+                                ></div>
+                                <!-- Details -->
+                                <div class="event-slot-detail-card">
+                                    <!-- Header -->
+                                    <div
+                                        class="event-card-header slds-align-top slds-border_bottom"
+                                    >
+                                        <div
+                                            class="event-card-header-title slds-align_bottom slds-truncate"
+                                        >
+                                            <p
+                                                class="slds-text-heading-body_small slds-text-color_inverse"
+                                            >
+                                                {event.subject}
+                                            </p>
+                                        </div>
+                                        <!-- Actions Menu Popup modal -->
+                                        <div
+                                            class="event-card-header-actions"
+                                            if:true={event.selected}
+                                        >
+                                            <lightning-button-icon
+                                                icon-name="utility:down"
+                                                variant="border-inverse"
+                                                size="xx-small"
+                                                onclick={toggleMenuItem}
+                                                data-id={event.id}
+                                                data-start={event.top}
+                                                data-day-index={event.dayIndex}
+                                            ></lightning-button-icon>
+                                        </div>
+                                    </div>
+                                    <!-- Event Body -->
+                                    <div
+                                        class="event-card-detail slds-text-heading-body_small slds-text-color_inverse"
+                                    >
+                                        <p class="slds-truncate">
+                                            {event.formattedStartTime} -
+                                            {event.formattedEndTime}
+                                        </p>
+                                        <p>
+                                            {event.totalTimeInMinutes} Minutes
+                                        </p>
+                                        <p>{event.value}</p>
+                                    </div>
+                                </div>
+                                <!-- Right Edge -->
+                                <div
+                                    class={event.className}
+                                    data-name="right"
+                                ></div>
+                            </div>
+                            <!-- End Detail Box -->
+
+                            <!-- Event Down Handle   -->
+                            <div
+                                class="dragged-down-button"
+                                draggable="true"
+                                data-name="bottom"
+                                data-id={event.id}
+                                ondblclick={hanldeDBClick}
+                                ondragstart={handleStartDrag}
+                                ondragend={handleEventSlotDragEnd}
+                                if:true={event.selected}
+                            ></div>
+                        </div>
+                    </template>
+                    <!-- end events data -->
+
+                    <!-- Menu actions -->
+                    <div
+                        class="slot-actions-container slds-m-left_small slds-m-top_x-small slds-is-absolute"
+                        data-name="actions"
+                    >
+                        <div
+                            class="slds-dropdown slds-dropdown_left slds-nubbin_top-right"
+                        >
+                            <ul
+                                class="slds-dropdown__list"
+                                role="menu"
+                                aria-label="Show More"
+                            >
+                                <template
+                                    for:each={menuActions}
+                                    for:item="action"
+                                    for:index="actionIndex"
+                                >
+                                    <li
+                                        key={action.name}
+                                        class="slds-dropdown__item"
+                                        role="presentation"
+                                        data-name={action.name}
+                                        onclick={onMenuAction}
+                                    >
+                                        <a
+                                            href="javascript:void(0);"
+                                            role="menuitem"
+                                            tabindex={actionIndex}
+                                        >
+                                            <span
+                                                class="slds-truncate"
+                                                title={action.label}
+                                                >{action.label}</span
+                                            >
+                                        </a>
+                                    </li>
+                                </template>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Save Slot Details Panel -->
+                    <div
+                        class="event-slot-save-box slds-size_1-of-7 slds-m-top_x-small slds-is-absolute"
+                    >
+                        <lightning-button-icon
+                            variant="border-filled"
+                            size="small"
+                            icon-name="utility:close"
+                            onclick={resetDrag}
+                        ></lightning-button-icon>
+                        <lightning-button-icon
+                            variant="brand"
+                            size="small"
+                            icon-name="utility:save"
+                            onclick={handleSave}
+                        ></lightning-button-icon>
+                    </div>
+
+                    <!-- Change Slot Details Panel -->
+                    <div
+                        class="cal-time-slot-draggable slds-size_1-of-7 slds-is-absolute calendar-droppable-zone"
+                        data-name="dragBox"
+                        ondragenter={handleEnteredSlot}
+                    >
+                        <div
+                            class="slds-text-align_left slds-border_top slds-p-left_xx-small"
+                            data-name="startLabel"
+                            if:true={isDragging}
+                        >
+                            {dirtyEventSlot.formattedStartTime}
+                        </div>
+                        <div
+                            class="slds-align-bottom slds-text-align_right slds-border_bottom slds-p-right_xx-small"
+                            data-name="endLabel"
+                            if:true={isDragging}
+                        >
+                            {dirtyEventSlot.formattedEndTime}
+                        </div>
+                    </div>
+                </div>
+                <!-- End Day Slots -->
+            </div>
+        </div>
+    </div>
+</template>

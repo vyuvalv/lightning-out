@@ -1,0 +1,22 @@
+.actions-container {
+    padding: 5px;
+}
+
+.action-box {
+    border: 2px solid black;
+    text-align: center;
+    box-shadow: 3px 3px 3px gray;
+    background-color: white;
+    margin-bottom: 10px;
+}
+
+.action-box:hover {
+    cursor: pointer;
+}
+
+.action-box-selected {
+    border: 5px solid rgb(38, 15, 165);
+    background-color: rgba(144, 174, 240, 0.726);
+    color: white;
+    box-shadow: 3px 3px 3px rgb(62, 99, 141);
+}

@@ -1,0 +1,13 @@
+.banner-image {
+    /* height: 400px; */
+    display: block;
+}
+.card-action:hover {
+    border-color: #006dcc;
+    border-width: 2px;
+    cursor: pointer;
+}
+
+/* .action-spinner {
+    position: relative;
+} */

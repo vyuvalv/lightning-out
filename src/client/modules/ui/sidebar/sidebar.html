@@ -1,0 +1,20 @@
+<template>
+    <div class="actions-container slds-grid slds-grid_vertical">
+        <template for:each={actions} for:item="action">
+            <div
+                key={action.name}
+                class={action.className}
+                onclick={onSelectAction}
+                data-name={action.name}
+            >
+                <lightning-icon
+                    size={iconSize}
+                    icon-name={action.iconName}
+                    variant={action.variant}
+                    title="calendar"
+                ></lightning-icon>
+                <p>{action.label}</p>
+            </div>
+        </template>
+    </div>
+</template>

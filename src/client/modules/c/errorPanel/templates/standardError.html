@@ -1,0 +1,14 @@
+<template>
+    <div class="slds-box slds-var-m-vertical_small">
+        <span class="slds-text-color_destructive">
+            {friendlyMessage}
+        </span>
+        <template if:true={errorMessages.length}>
+            <template for:each={errorMessages} for:item="message">
+                <p class="slds-text-body_regular" key={message}>
+                    {message}
+                </p>
+            </template>
+        </template>
+    </div>
+</template>

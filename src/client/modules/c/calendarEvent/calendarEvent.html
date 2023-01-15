@@ -1,0 +1,21 @@
+<template>
+    <lightning-card title="New" class="slds-form slds-p-around_small">
+        <div class="slds-grid slds-wrap">
+            <template for:each={eventFields} for:item="field">
+                <div
+                    key={field.fieldName}
+                    class="slds-col slds-size_1-of-2 slds-p-vertical_x-small slds-p-horizontal_medium"
+                >
+                    <lightning-input
+                        class="event-input-field"
+                        type={field.type}
+                        name={field.fieldName}
+                        label={field.label}
+                        value={field.value}
+                        readonly={field.readonly}
+                    ></lightning-input>
+                </div>
+            </template>
+        </div>
+    </lightning-card>
+</template>

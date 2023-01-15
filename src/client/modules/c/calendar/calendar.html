@@ -1,0 +1,106 @@
+<template>
+    <div
+        class="slds-grid slds-wrap slds-grid_align-spread slds-theme_shade slds-p-around_small"
+    >
+        <div class="slds-col">
+            <lightning-button-icon
+                name="filter"
+                icon-name="utility:filterList"
+                onclick={openFilterModal}
+            ></lightning-button-icon>
+        </div>
+        <div class="slds-col slds-align-middle slds-p-horizontal_medium">
+            <h1 class="slds-text-title_bold slds-truncate">
+                {formattedDatesPeriod}
+            </h1>
+            <p class="slds-text-color_weak">{formattedMonthsPeriod}</p>
+        </div>
+        <div class="slds-col_bump-left">
+            <div class="slds-show_inline-block">
+                <lightning-button-icon
+                    icon-name="utility:left"
+                    variant="border-filled"
+                    onclick={navigateToPrevious}
+                ></lightning-button-icon>
+                <lightning-button
+                    label="Today"
+                    onclick={navigateToToday}
+                ></lightning-button>
+                <lightning-button-icon
+                    icon-name="utility:right"
+                    variant="border-filled"
+                    onclick={navigateToNext}
+                ></lightning-button-icon>
+
+                <lightning-button-icon
+                    icon-name="utility:refresh"
+                    variant="border-filled"
+                    onclick={refreshData}
+                ></lightning-button-icon>
+            </div>
+            <!-- <div class="slds-show_inline-block slds-align-top"> -->
+            <!-- <lightning-input
+                  label="Date"
+                  type="datetime"
+                  name="select-date"
+                  variant="label-hidden"
+                  class="lwc-datepicker slds-m-left_small"
+                  value={datePickerString}
+                  onchange={navigateToDay}
+                ></lightning-input> -->
+            <!-- </div> -->
+            <!-- View Select -->
+            <div class="slds-show_inline-block">
+                <lightning-combobox
+                    value={currentView}
+                    options={viewOptions}
+                    onchange={onViewChange}
+                    variant="label-hidden"
+                    class="slds-m-left_small"
+                ></lightning-combobox>
+                <!-- /View Select -->
+            </div>
+        </div>
+        <div
+            class="slds-size_1-of-1 slds-grid slds-theme_default slds-box_border"
+        >
+            <div
+                class="slds-size_1-of-2 slds-align-middle slds-p-horizontal_xx-small"
+            >
+                <lightning-button-group>
+                    <lightning-button label="Day"></lightning-button>
+                    <lightning-button
+                        label="Agenda"
+                        variant="neutral"
+                    ></lightning-button>
+                    <lightning-button
+                        label="Week"
+                        variant="brand"
+                    ></lightning-button>
+                </lightning-button-group>
+            </div>
+            <div
+                class="slds-col_bump-left slds-text-align_center slds-p-around_xx-small"
+            >
+                <lightning-input
+                    type="toggle"
+                    label="Resource View"
+                    name="resourceView"
+                ></lightning-input>
+            </div>
+        </div>
+    </div>
+
+    <c-calendar-view
+        view={currentView}
+        start-date={startDate}
+        end-date={endDate}
+        number-of-days={dateShift}
+        events={eventData}
+        onselectedslot={handleSelectedSlot}
+        onupdateevent={handleUpdateData}
+        oninsertevent={handleNewEventSlot}
+        onkeyup={handleKeyPress}
+        ondelete={handleDelete}
+    ></c-calendar-view>
+</template>

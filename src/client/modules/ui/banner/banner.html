@@ -1,0 +1,30 @@
+<template>
+    <lightning-card title={activeIcon.label}>
+        <div slot="actions">
+            <div
+                class="card-action slds-button_icon-border slds-align_absolute-center"
+            >
+                <lightning-icon
+                    class="action-item"
+                    data-name={activeIcon.name}
+                    title={activeIcon.label}
+                    icon-name={activeIcon.iconName}
+                    size="small"
+                    variant={activeIcon.variant}
+                    onclick={login}
+                ></lightning-icon>
+                <lightning-spinner
+                    if:true={loading}
+                    class="slds-is-relative"
+                    alternative-text="Loading"
+                    size="small"
+                ></lightning-spinner>
+                <!---->
+            </div>
+            <!-- <lightning-button-icon icon-name="utility:unlock" variant="brand" onclick={create}></lightning-button-icon> -->
+        </div>
+        <div class="slds-grid">
+            <img src={bannerImage} class="banner-image" />
+        </div>
+    </lightning-card>
+</template>

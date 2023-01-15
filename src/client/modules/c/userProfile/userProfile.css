@@ -1,0 +1,89 @@
+.user-profile-container {
+    width: 100%;
+}
+
+.user-profile-background {
+    max-height: 5rem;
+    box-shadow: 0px 0px 5px black;
+    height: 50%;
+    color: white;
+    /* text-shadow: 2px 2px 2px black; */
+    z-index: -1000;
+}
+
+.user-profile-image {
+    display: flex;
+    justify-content: center;
+}
+
+.user-profile-image img {
+    width: 50px;
+    height: 50px;
+    margin: auto;
+    max-height: 5rem;
+    border-radius: 25%;
+    box-shadow: 0px 0px 5px black;
+}
+
+/* .user-profile-image img:hover{
+    content: url('https://image.shutterstock.com/image-vector/plus-icon-flat-design-style-260nw-589199351.jpg'); 
+    display: block;
+    position: relative;
+    cursor:pointer;
+    animation: appear 2s;
+}  */
+
+@keyframes appear {
+    0% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+
+.language-flag {
+    width: 1.5rem;
+    position: relative;
+    box-shadow: 0px 0px 5px white;
+}
+.language-edit-button {
+    display: block;
+    opacity: 0;
+}
+.language-edit-button-hide {
+    opacity: 1;
+    position: relative;
+    top: -1rem;
+    padding-left: 3px;
+    z-index: 1000;
+    transition: display 2s;
+}
+
+.morning-background {
+    background: linear-gradient(
+        148deg,
+        rgba(68, 76, 223, 1) 0%,
+        rgba(97, 186, 245, 1) 51%,
+        rgba(155, 208, 255, 1) 100%
+    );
+    box-shadow: 0px 0px 5px black;
+}
+.noon-background {
+    background: linear-gradient(
+        148deg,
+        rgba(223, 176, 68, 1) 0%,
+        rgba(245, 215, 97, 1) 51%,
+        rgba(255, 253, 155, 1) 100%
+    );
+    box-shadow: 0px 0px 5px black;
+}
+.evening-background {
+    background: linear-gradient(
+        180deg,
+        rgba(68, 91, 223, 1) 0%,
+        rgba(71, 102, 162, 1) 51%,
+        rgba(34, 42, 101, 1) 100%
+    );
+    box-shadow: 0px 0px 5px black;
+}

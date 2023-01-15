@@ -1,0 +1,179 @@
+/*** Containers ***/
+.timeslots-container {
+    height: 400px;
+    scroll-behavior: smooth;
+    overflow-y: scroll;
+    z-index: var(--slot-layer, 0);
+    /* transition: overflow-y ease 100ms; */
+}
+
+.cal-time-slot-event {
+    height: var(--slot-height, 30px);
+    top: var(--slot-top-position);
+    left: var(--slot-left-position, 0%);
+    opacity: var(--slot-opacity, 0.9);
+    background-color: var(--slot-background);
+    box-shadow: 2px 2px 5px white;
+    border-radius: 0.1rem;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    font-size: 0.75rem;
+    z-index: 10;
+    cursor: grab;
+    cursor: pointer;
+    transition: opacity ease 250ms;
+}
+
+.cal-time-slot-draggable {
+    display: none;
+    top: var(--slot-top-position);
+    height: var(--slot-height, 30px);
+    left: var(--slot-left-position, 0%);
+    background-color: #bd4f4f6b;
+    opacity: var(--slot-opacity, 1);
+    grid-template-rows: auto;
+    z-index: 5;
+    color: white;
+    font-size: 10px;
+    font-weight: bold;
+}
+
+/* T R B L */
+/* Dragging Elements */
+.dragged-up-button {
+    background-color: var(--slot-edge-color);
+    height: var(--slot-edge-size);
+    opacity: var(--slot-opacity, 0.9);
+    border-top: 2px solid black;
+    cursor: ns-resize;
+}
+.dragged-down-button {
+    background-color: var(--slot-edge-color);
+    height: var(--slot-edge-size);
+    opacity: var(--slot-opacity, 0.9);
+    border-bottom: 2px solid black;
+    cursor: ns-resize;
+}
+.event-slot-detail-box {
+    opacity: var(--slot-opacity, 0.9);
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+}
+.cal-time-slot {
+    opacity: var(--slot-opacity, 1);
+}
+
+.cal-time-slot-hovered {
+    background-color: var(--slot-edge-color);
+}
+/* 24 HOURS * 2 * --slot-height = 30px */
+.timeslots-grid {
+    height: var(--grid-height);
+    overflow: hidden;
+}
+.vertical-timeline-slots {
+    display: grid;
+    grid-template-rows: repeat(48, var(--slot-height));
+    cursor: default;
+}
+.selectable-vertical-timeline-slots {
+    display: grid;
+    grid-template-rows: repeat(48, var(--slot-height));
+    cursor: crosshair;
+}
+
+.cal-time-slot-label {
+    font-size: 0.5rem;
+}
+
+.cal-time-slot-box {
+    padding-top: 3px;
+    height: var(--slot-height, 30px);
+}
+.cal-time-slot-selectable-box {
+    padding-top: 3px;
+    height: var(--slot-height, 30px);
+}
+
+.cal-time-slot-selected {
+    background-color: var(--slot-background, pink);
+    cursor: grabbed;
+}
+
+.selected-day {
+    background-color: antiquewhite;
+}
+
+.event-slot-selected {
+    background-color: #1969ce;
+    width: var(--slot-edge-size);
+}
+.event-slot-dirty {
+    background-color: rgba(246, 246, 15, 1);
+    width: var(--slot-edge-size);
+    border-right: 2px solid black;
+    border-left: 2px solid black;
+}
+
+/* margin: 1px 1px 0px 1px;  */
+
+.event-slot-detail-card {
+    display: grid;
+    grid-template-rows: 30px 1fr;
+}
+.event-card-header {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    padding: 1px 5px 2px 5px;
+}
+/* When shrink hide */
+.event-card-detail {
+    display: block;
+    padding: 0px 5px;
+}
+
+.event-slot-save-box {
+    display: none;
+    top: var(--slot-top-position);
+    left: var(--slot-left-position, 0%);
+    grid-template-columns: 1fr auto;
+    grid-column-gap: 5px;
+    margin-top: 5px;
+    justify-items: end;
+}
+
+.arrow-up {
+    width: 0;
+    height: 0;
+    border-left: 7.5px solid transparent;
+    border-right: 7.5px solid transparent;
+    border-bottom: 8px solid rgba(21, 137, 238);
+}
+.arrow-down {
+    width: 0;
+    height: 0;
+    border-left: 7.5px solid transparent;
+    border-right: 7.5px solid transparent;
+    border-top: 8px solid rgba(21, 137, 238);
+}
+
+.time-badge {
+    width: 50px;
+}
+
+.draggable-icon {
+    transform: rotate(-90deg);
+    position: relative;
+    top: -2px;
+}
+
+.day-label-block {
+    box-shadow: 0px 2px 3px black;
+}
+
+/* EVENT SLOT ACTIONS  */
+.slot-actions-container {
+    display: none;
+    top: var(--slot-top-position);
+    left: var(--slot-menu-position, 10%);
+}

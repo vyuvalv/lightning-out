@@ -1,0 +1,30 @@
+<template>
+    <ui-container>
+        <div slot="sidebar">
+            <ui-sidebar
+                actions={sidebarActions}
+                path-name={pathName}
+                onselect={handleSidebarSelect}
+            ></ui-sidebar>
+        </div>
+        <div slot="content">
+            <ui-content-body
+                if:true={pathName}
+                path-name={pathName}
+                onpublish={onLogin}
+            ></ui-content-body>
+        </div>
+
+        <div slot="actions">
+            <c-user-profile
+                if:true={userId}
+                user={currentUser}
+            ></c-user-profile>
+            <lightning-button-icon
+                icon-name="utility:add"
+                variant="border-filled"
+                onclick={create}
+            ></lightning-button-icon>
+        </div>
+    </ui-container>
+</template>
