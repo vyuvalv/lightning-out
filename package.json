@@ -56,7 +56,7 @@
         ],
         "exec": "node ./src/server/main.js"
     },
-    "repository": "oslwc",
+    "repository": "lightning-out-web",
     "scripts": {
         "build": "lwc-services build -m production",
         "build:development": "lwc-services build",
@@ -69,6 +69,6 @@
         "test:unit:watch": "lwc-services test:unit --watch",
         "watch:client": "lwc-services watch",
         "watch:server": "nodemon",
-        "watch:all": "run-p watch:client watch:server"
+        "watch": "run-p watch:client watch:server"
     }
 }
