@@ -32,3 +32,4 @@ src/client/resources/assets
 package-lock.json
 .gitignore
 .env
+src/SF_Org/scripts
