@@ -8,14 +8,13 @@ module.exports = {
     sourceDir: `./${srcFolder}`,
 
     resources: [
-        { from: `${srcFolder}/resources/`, to: `${buildFolder}/resources/` },
         {
             from: 'node_modules/@salesforce-ux/design-system/assets',
-            to: `${srcFolder}/resources/SLDS`
+            to: `${srcFolder}/resources/assets`
         },
         {
-            from: 'node_modules/@salesforce-ux/design-system/assets',
-            to: `${buildFolder}/resources/SLDS`
+            from: 'src/client/resources',
+            to: 'dist/resources/'
         }
     ],
     devServer: { proxy: { '/': 'http://localhost:3002' } }
