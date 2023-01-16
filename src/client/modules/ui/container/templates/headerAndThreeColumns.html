@@ -1,0 +1,35 @@
+<template>
+    <div class="grid-container">
+        <div if:true={links.length} class="header-bar">
+            <template for:each={links} for:item="link">
+                <a
+                    key={link.name}
+                    data-name={link.name}
+                    onclick={handleLinkClick}
+                    >{link.label}</a
+                >
+            </template>
+            <lightning-button-icon
+                class="header-close-button"
+                icon-name="utility:close"
+                variant="bare"
+                size="large"
+            ></lightning-button-icon>
+        </div>
+        <div class="side-bar side-bar-left">
+            <slot name="sidebar"></slot>
+        </div>
+        <div class="drag-bar drag-bar-left" data-name="left"></div>
+
+        <div class="content">
+            <slot name="content"></slot>
+        </div>
+
+        <div class="drag-bar drag-bar-right" data-name="right"></div>
+        <div class="actions side-bar-right">
+            <slot name="actions"></slot>
+        </div>
+
+        <div class="web-backdrop"></div>
+    </div>
+</template>

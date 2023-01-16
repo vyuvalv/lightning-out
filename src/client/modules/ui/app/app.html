@@ -5,9 +5,10 @@
         variant="border-filled"
         onclick={renderLightningOut}
     ></lightning-button>
-    <!-- <div lwc:dom="manual" id="lightning-out" class="lightning-out"></div> -->
 
-    <ui-container>
+    <!-- Container is used to control the theme of the site -->
+    <ui-container links={sidebarActions}>
+        <!-- Left Sidebar -->
         <div slot="sidebar">
             <ui-sidebar
                 actions={sidebarActions}
@@ -15,6 +16,7 @@
                 onselect={handleSidebarSelect}
             ></ui-sidebar>
         </div>
+        <!-- Main content -->
         <div slot="content">
             <ui-content-body
                 if:true={pathName}
@@ -22,7 +24,7 @@
                 onpublish={onLogin}
             ></ui-content-body>
         </div>
-
+        <!-- Right Sidebar -->
         <div slot="actions">
             <c-user-profile
                 if:true={userId}
