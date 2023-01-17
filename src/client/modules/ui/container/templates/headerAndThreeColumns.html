@@ -1,21 +1,25 @@
 <template>
-    <div class="grid-container">
-        <div if:true={links.length} class="header-bar">
-            <template for:each={links} for:item="link">
+    <div class="header-bar">
+        <div if:true={isMenuOpen} class="header-bar-links">
+            <template if:true={links.length} for:each={links} for:item="link">
                 <a
+                    class={link.className}
                     key={link.name}
                     data-name={link.name}
                     onclick={handleLinkClick}
                     >{link.label}</a
                 >
             </template>
-            <lightning-button-icon
-                class="header-close-button"
-                icon-name="utility:close"
-                variant="bare"
-                size="large"
-            ></lightning-button-icon>
         </div>
+        <lightning-button-icon
+            class="header-close-button"
+            icon-name={hamburgerMenuIcon}
+            variant="bare"
+            size="large"
+            onclick={handleToggleMenu}
+        ></lightning-button-icon>
+    </div>
+    <div class="grid-container">
         <div class="side-bar side-bar-left">
             <slot name="sidebar"></slot>
         </div>
@@ -30,6 +34,6 @@
             <slot name="actions"></slot>
         </div>
 
-        <div class="web-backdrop"></div>
+        <div if:true={isMenuOpen} class="web-backdrop"></div>
     </div>
 </template>

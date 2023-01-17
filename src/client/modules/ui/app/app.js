@@ -36,17 +36,26 @@ export default class App extends LightningElement {
 
     _currentUser;
 
+    handleMenuItemSelect(event) {
+        const { actionName } = event.detail;
+        this.addToBrowserHistory(actionName);
+    }
     handleSidebarSelect(event) {
         const actionName = event.detail;
         console.log('actionName ' + actionName);
-        this._pathName = actionName;
-        window.history.pushState(
-            { page: this._pathName },
-            this._pathName,
-            `?page=${this._pathName}`
-        );
+        this.addToBrowserHistory(actionName);
     }
+    addToBrowserHistory(actionName) {
+        if (actionName) {
+            this._pathName = actionName;
 
+            window.history.pushState(
+                { page: this.pathName },
+                this.pathName,
+                `?page=${this.pathName}`
+            );
+        }
+    }
     get currentUser() {
         return this._currentUser ? this._currentUser : '';
     }
