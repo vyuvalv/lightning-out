@@ -3,7 +3,7 @@ logs
 *.log
 *-debug.log
 *-error.log
-
+.sfdx
 # Standard lib folder
 /lib
 
