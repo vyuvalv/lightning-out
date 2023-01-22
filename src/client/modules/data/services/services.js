@@ -1,18 +1,30 @@
-const REQUEST = {
-    method: 'POST', // *GET, POST, PUT, DELETE, etc.
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({}) // body data type must match "Content-Type" header
-};
 const PORT = ''; //http://localhost:3002
 
-export async function sfLogin() {
-    const req = { ...REQUEST };
-    const response = await fetch(`${PORT}/api/v1/login`, req);
-    if (!response.ok) {
-        throw new Error('No response from server');
+/*
+ * Interact with GraphQL Data From Server
+ */
+export async function getData(query) {
+    const endpoint = `${PORT}/api/graphql`;
+    console.log('query : ' + query.query);
+    try {
+        const response = await fetch(endpoint, {
+            method: 'POST',
+            mode: 'cors',
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            },
+            body: JSON.stringify(query)
+        });
+        if (!response.ok) {
+            throw new Error('No response from server');
+        }
+        return response.json();
+    } catch (e) {
+        return e;
     }
-    return response.json();
 }
+
 
 export async function getActiveOrgs() {
     const response = await fetch(`${PORT}/api/v1/sfdx/org/list`);
@@ -22,21 +34,6 @@ export async function getActiveOrgs() {
     return response.json();
 }
 
-// eslint-disable-next-line no-unused-vars
-export async function getUserInfo(userId, sessionToken, instanceUrl) {
-    const response = await fetch(`${PORT}/api/v1/user/${userId}`, {
-        method: 'GET',
-        mode: 'cors',
-        headers: {
-            'Content-Type': 'application/json',
-            Accept: 'application/json'
-        }
-    });
-    if (!response.ok) {
-        throw new Error('No response from server');
-    }
-    return response.json();
-}
 
 export const getRecords = endpoint =>
     fetch(endpoint)

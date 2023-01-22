@@ -16,9 +16,11 @@ let scriptPromise;
 
 window.addEventListener('DOMContentLoaded', () => {
     const pageName = document.location.search.substr(6).split('?page=');
-    console.log(`initial page: ${pageName}`);
-    app.pathName = pageName;
-    element.appendChild(app);
+    if(pageName){
+        console.log(`initial page: ${pageName}`);
+        app.pathName = pageName;
+        element.appendChild(app);
+    }
     // addHistory(pageName);
 
     // Try to set the lightning out script on load if anything exists in local storage

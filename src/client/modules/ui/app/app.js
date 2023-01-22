@@ -1,7 +1,7 @@
 /* eslint-disable no-prototype-builtins */
 import { LightningElement, api, track } from 'lwc';
-import { sfLogin, getUserInfo, getRecords, createRecord } from 'data/services';
-
+import { getData, getRecords, createRecord } from 'data/services';
+import { UserQuery } from './data/sfQuery';
 const ENDPOINT = '/api/v1/accounts';
 const FIELDS = ['Name', 'Type'];
 
@@ -65,8 +65,7 @@ export default class App extends LightningElement {
         console.log('app path ' + this.pathName);
     }
     renderLightningOut() {
-        // const element = this.template.querySelector('.lightning-out');
-        // const divId = 'lightning-out';
+        // Post Message to main index.js to render lightning out
         window.postMessage(
             {
                 accessToken: this.accessToken,
@@ -74,27 +73,6 @@ export default class App extends LightningElement {
             },
             'http://localhost:3001'
         );
-        // lexDiv.use("c:actionsApp", () => {
-        //     lexDiv.createComponent("c:actionsContainer", {
-        //                                                         "sObjectName":"RouteAction__c",
-        //                                                         "recordId":'a000C000005eKXRQA2',
-        //                                                         "displayType":"VerticalNavigation",
-        //                                                         "isAdmin":true,
-        //                                                         "rtl":false,
-        //                                                         "usedAsScreen":false,
-        //                                                         "sortOrder":"asc",
-        //                                                         "fromOrder":1,
-        //                                                         "toOrder":100,
-        //                                                         "pageSize":5,
-        //                                                         "componentId":3
-        //                                                         },
-        //                                                         divId,
-        //                                                         function(cmp) {
-        //                                                                 console.log('component created');
-        //                                                                 console.log(cmp);
-        //                                                             });
-
-        //                                                     }, "https://business-computing-1495-dev-ed.scratch.lightning.force.com/", this.accessToken);
     }
 
     loadRecords() {
@@ -161,50 +139,40 @@ export default class App extends LightningElement {
         if(container)
         container.toggleRightPanel(toggle);
     }
-    getUser() {
-        getUserInfo(this.activeUserId, this.accessToken, this.instanceUrl)
-            .then(reponse => {
-                if (reponse.data) {
-                    // console.log('logged in successfully ' + JSON.stringify(reponse.data[0]));
-                    this._currentUser = reponse.data[0];
-                    this.rightSideBarOpen = true;
-                    this.toggleRightSidebar(this.rightSideBarOpen);
-                }
-            })
-            .catch(error => {
-                console.log(error);
-            });
-    }
 
-    loginToOrg() {
+    async loginToOrg() {
         this.loading = true;
-        
-            sfLogin()
-                .then(reponse => {
-                    if (reponse.data.accessToken) {
-                        const details = reponse.data;
-                        this.activeUserId = details.userId;
-                        this.accessToken = details.accessToken;
-                        this.instanceUrl = details.instanceUrl;
-                        this.orgId = details.orgId;
-                        console.log('details : ' + JSON.stringify(details));
-                        // Set login detail in session storage
-                        window.sessionStorage.setItem('sf_accessToken', details.accessToken);
-                        window.sessionStorage.setItem('sf_instanceUrl', details.instanceUrl);
-                        window.sessionStorage.setItem('sf_userId', details.userId);
-                        window.sessionStorage.setItem('sf_orgId', details.orgId);
-                        // Sets Logged In flag
-                        this.loggedIn = true;
-                        // Get User Details
-                        this.getUser();
-                    }
-                })
-                .catch(error => {
-                    this.loggedIn = false;
-                    //  this.loading = false;
-                    //if(typeof error !== 'object')
-                    console.error('cannot login ' + error);
-                });
+        const graphQuery = UserQuery();
+        try {
+            const response = await getData(graphQuery);
+            if (response) {
+                const details = response.data.login;
+                
+                this.activeUserId = details.userId;
+                this.accessToken = details.accessToken;
+                this.instanceUrl = details.loginUrl;
+                this.orgId = details.organizationId;
+             
+                console.log('details.loggedInUser : ' + JSON.stringify(details.loggedInUser));
+                // Set login detail in session storage
+                window.sessionStorage.setItem('sf_accessToken', details.accessToken);
+                window.sessionStorage.setItem('sf_instanceUrl', details.loginUrl);
+                window.sessionStorage.setItem('sf_userId', details.userId);
+                window.sessionStorage.setItem('sf_orgId', details.organizationId);
+                // Sets Logged In flag
+                this.loggedIn = true;
+                // Get User Details
+                this._currentUser = details.loggedInUser;
+                this.loading = false;
+                this.rightSideBarOpen = true;
+                this.toggleRightSidebar(this.rightSideBarOpen);
+            }
+        } catch (error) {
+            this.loggedIn = false;
+            this.loading = false;
+            //if(typeof error !== 'object')
+            console.error('cannot login ' + error);
+        }
     }
     
     get currentUser() {
