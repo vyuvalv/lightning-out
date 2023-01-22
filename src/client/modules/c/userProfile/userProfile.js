@@ -1,20 +1,33 @@
 /* eslint-disable default-case */
-import { LightningElement, api } from 'lwc';
+import { LightningElement, api, track } from 'lwc';
 
 const flags = '/resources/images/flags';
 const MORNING_TIME = 12,
     NOON_TIME = 16;
 
-// const FIELDS = [
-//                     'Name',
-//                     'Email',
-//                     'FullPhotoUrl',
-//                     'LastLoginDate',
-//                     'LanguageLocaleKey',
-//                     'TimeZoneSidKey',
-//                     'UserRoleId',
-//                 ];
+const FIELDS = [
+                    'Name',
+                    'Email',
+                    'LastLoginDate',
+                ];
+const FIELDS_LABELS = {
+    'Name':'Name',
+    'Email':'Email',
+    'LastLoginDate':'Last Login Date'
+}
 
+// const SAMPLE_USER_DATA = {
+//     "attributes": {
+//         "type": "User",
+//         "url": "/services/data/v42.0/sobjects/User/0050C000007JyODQA0"
+//     },
+//     "Id": "0050C000007JyODQA0",
+//     "Name": "User User",
+//     "Email": "vyuvalv@gmail.com",
+//     "FullPhotoUrl": "https://qsyd-perma-bucket.s3-ap-southeast-2.amazonaws.com/file-explorer/images/file200x200.png",
+//     "LanguageLocaleKey": "en_US",
+//     "LastLoginDate": "2023-01-18T20:53:06.000+0000"
+// };  
 export default class UserProfile extends LightningElement {
     @api
     get user() {
@@ -24,7 +37,7 @@ export default class UserProfile extends LightningElement {
         this._currentUser = value;
     }
 
-    _currentUser;
+    @track _currentUser;
     imageTest = flags + '/es.svg';
     currentUserId;
     currentUserLanguageKey = 'en_US';
@@ -39,7 +52,7 @@ export default class UserProfile extends LightningElement {
 
     usFlag = flags + '/united-states.svg';
     userResults;
-
+    readonly = true;
     connectedCallback() {
         this.currentUserLanguage = this.languageOptions.find(
             lang => lang.value === this.user.LanguageLocaleKey
@@ -127,6 +140,14 @@ export default class UserProfile extends LightningElement {
         }
     ];
 
+    get displayedUserFields() {
+        return FIELDS.map(field => ({
+            name: field, 
+            value: this.user[field] ? this.user[field] : '',
+            label: FIELDS_LABELS[field],
+            className: 'user-field'
+        }))
+    }
     onLanguageHover(event) {
         const editButton = this.template.querySelector('.language-edit-button');
         editButton.classList.toggle('language-edit-button-hide');
@@ -147,13 +168,38 @@ export default class UserProfile extends LightningElement {
         );
         // this.updateUser();
     }
-    saveUser() {
-        // this.updateUser();
-    }
 
     get userProfileImage() {
         return this._currentUser.FullPhotoUrl
             ? this._currentUser.FullPhotoUrl
             : 'https://qsyd-perma-bucket.s3-ap-southeast-2.amazonaws.com/file-explorer/images/file200x200.png';
+    }
+
+    toggleEditMode(event) {
+        this.readonly = !this.readonly;
+        const button = event.target;
+        button.iconName = this.readonly ? "utility:edit" : "utility:close";
+    }
+    handleSaveUser() {
+        const fields = this.template.querySelectorAll('.user-field');
+        let inputs = [];
+        if(fields){
+            fields.forEach(input => {
+                if(input.value)
+                inputs.push({ name: input.name, value: input.value });
+            });
+            console.log('collectedValues : ' + JSON.stringify(inputs));
+
+            this.dispatchEvent(new CustomEvent('save', { detail: inputs }))
+        }
+    }
+    handleImgError() {
+        
+        console.warn('profile image is private in org, in order to display it youll need to set it to public.');
+        // Set default image
+        this._currentUser = {
+            ...this.user,
+            FullPhotoUrl: 'https://qsyd-perma-bucket.s3-ap-southeast-2.amazonaws.com/file-explorer/images/file200x200.png'
+        };
     }
 }

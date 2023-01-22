@@ -33,11 +33,12 @@ export default class Container extends LightningElement {
         return deafultView;
     }
     isMenuOpen = false;
+    isRightMenuOpen = false;
     handleLinkClick(event) {
         event.preventDefault();
         const actionName = event.target.dataset.name;
         this._pathName = actionName;
-        console.log('actionName: ' + actionName);
+        // console.log('actionName: ' + actionName);
         this.dispatchEvent(
             new CustomEvent('navigate', {
                 detail: {
@@ -50,7 +51,34 @@ export default class Container extends LightningElement {
         this.isMenuOpen = !this.isMenuOpen;
     }
 
+    
+    handleOpenLoginPanel() {
+        this.isRightMenuOpen = !this.isRightMenuOpen;
+        this.toggleRightPanel(this.isRightMenuOpen);
+
+         this.dispatchEvent(
+            new CustomEvent('toggle', {
+                detail: {
+                    menuOpen:this.isRightMenuOpen
+                }
+            })
+        );
+    }
+    @api
+    toggleRightPanel(toggle) {
+        const grid = this.template.querySelector('.grid-container');
+        const rightSideWidth = toggle ? '12rem' : '3rem';
+        grid.style.setProperty('--rightbar-width', rightSideWidth); 
+    }
+
     get hamburgerMenuIcon() {
         return this.isMenuOpen ? 'utility:close' : 'utility:justify_text';
+    }
+    get loginButton() {
+        
+        return {
+            name: 'login',
+            label: this.isRightMenuOpen ? 'Close > ' : 'UserName <' 
+        };
     }
 }

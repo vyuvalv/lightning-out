@@ -1,6 +1,6 @@
 /* eslint-disable no-prototype-builtins */
 import { LightningElement, api, track } from 'lwc';
-import { getUserInfo, getRecords, createRecord } from 'data/services';
+import { sfLogin, getUserInfo, getRecords, createRecord } from 'data/services';
 
 const ENDPOINT = '/api/v1/accounts';
 const FIELDS = ['Name', 'Type'];
@@ -56,9 +56,7 @@ export default class App extends LightningElement {
             );
         }
     }
-    get currentUser() {
-        return this._currentUser ? this._currentUser : '';
-    }
+   
     results = '';
     @track records = [];
 
@@ -128,13 +126,21 @@ export default class App extends LightningElement {
 
     accessToken;
     instanceUrl;
-    userId = '';
+    orgId;
+    activeUserId = '';
     loggedIn = false;
-
-    onLogin(event) {
-        this.userId = event.detail.userId;
-        console.log('userId : ' + this.userId);
-        this.getUser();
+    rightSideBarOpen = false;
+    handleLoginUser() {
+        console.log('login');
+        if (this.loggedIn) {
+            this.rightSideBarOpen = !this.rightSideBarOpen;
+            this.toggleRightSidebar( this.rightSideBarOpen);
+        }
+        else {
+            console.log('nologin');
+            this.activeUserId = '';
+            this.loginToOrg();
+        }
     }
 
     create() {
@@ -150,20 +156,58 @@ export default class App extends LightningElement {
                 console.log(error);
             });
     }
-
+    toggleRightSidebar(toggle = true) {
+        const container = this.template.querySelector('ui-container');
+        if(container)
+        container.toggleRightPanel(toggle);
+    }
     getUser() {
-        this.accessToken = window.sessionStorage.getItem('sf_accessToken');
-        this.instanceUrl = window.sessionStorage.getItem('sf_instanceUrl');
-        console.log('getting accessToken ' + this.accessToken);
-        getUserInfo(this.userId, this.accessToken, this.instanceUrl)
+        getUserInfo(this.activeUserId, this.accessToken, this.instanceUrl)
             .then(reponse => {
                 if (reponse.data) {
                     // console.log('logged in successfully ' + JSON.stringify(reponse.data[0]));
                     this._currentUser = reponse.data[0];
+                    this.rightSideBarOpen = true;
+                    this.toggleRightSidebar(this.rightSideBarOpen);
                 }
             })
             .catch(error => {
                 console.log(error);
             });
+    }
+
+    loginToOrg() {
+        this.loading = true;
+        
+            sfLogin()
+                .then(reponse => {
+                    if (reponse.data.accessToken) {
+                        const details = reponse.data;
+                        this.activeUserId = details.userId;
+                        this.accessToken = details.accessToken;
+                        this.instanceUrl = details.instanceUrl;
+                        this.orgId = details.orgId;
+                        console.log('details : ' + JSON.stringify(details));
+                        // Set login detail in session storage
+                        window.sessionStorage.setItem('sf_accessToken', details.accessToken);
+                        window.sessionStorage.setItem('sf_instanceUrl', details.instanceUrl);
+                        window.sessionStorage.setItem('sf_userId', details.userId);
+                        window.sessionStorage.setItem('sf_orgId', details.orgId);
+                        // Sets Logged In flag
+                        this.loggedIn = true;
+                        // Get User Details
+                        this.getUser();
+                    }
+                })
+                .catch(error => {
+                    this.loggedIn = false;
+                    //  this.loading = false;
+                    //if(typeof error !== 'object')
+                    console.error('cannot login ' + error);
+                });
+    }
+    
+    get currentUser() {
+        return this._currentUser ? this._currentUser : '';
     }
 }

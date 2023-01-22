@@ -32,6 +32,11 @@
     cursor:pointer;
     animation: appear 2s;
 }  */
+.user-profile-form-actions {
+    display: flex;
+    padding: 0.5rem;
+    justify-content: flex-end;
+}
 
 @keyframes appear {
     0% {

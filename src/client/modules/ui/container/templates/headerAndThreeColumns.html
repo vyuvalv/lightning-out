@@ -11,13 +11,18 @@
                 >
             </template>
         </div>
-        <lightning-button-icon
-            class="header-close-button"
-            icon-name={hamburgerMenuIcon}
-            variant="bare"
-            size="large"
-            onclick={handleToggleMenu}
-        ></lightning-button-icon>
+        <div class="header-close-button">
+            <div class="login-button" data-name={loginButton.name} onclick={handleOpenLoginPanel}>
+                {loginButton.label}
+                <!-- <lightning-button name={loginButton.name} label={loginButton.label} onclick={handleOpenLoginPanel}></lightning-button> -->
+            </div>
+            <lightning-button-icon
+                icon-name={hamburgerMenuIcon}
+                variant="bare"
+                size="large"
+                onclick={handleToggleMenu}
+            ></lightning-button-icon>
+        </div>
     </div>
     <div class="grid-container">
         <div class="side-bar side-bar-left">

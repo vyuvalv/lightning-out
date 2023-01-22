@@ -7,7 +7,7 @@
     ></lightning-button>
 
     <!-- Container is used to control the theme of the site -->
-    <ui-container links={sidebarActions} onnavigate={handleMenuItemSelect}>
+    <ui-container links={sidebarActions} onnavigate={handleMenuItemSelect} ontoggle={handleLoginUser}>
         <!-- Left Sidebar -->
         <div slot="sidebar">
             <ui-sidebar
@@ -21,15 +21,16 @@
             <ui-content-body
                 if:true={pathName}
                 path-name={pathName}
-                onpublish={onLogin}
+                onpublish={handleLoginUser}
             ></ui-content-body>
         </div>
         <!-- Right Sidebar -->
-        <div slot="actions">
+        <div slot="actions" if:true={rightSideBarOpen}>
             <c-user-profile
-                if:true={userId}
+                if:true={activeUserId}
                 user={currentUser}
             ></c-user-profile>
+            
             <lightning-button-icon
                 icon-name="utility:add"
                 variant="border-filled"
