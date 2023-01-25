@@ -1,7 +1,7 @@
 /* eslint-disable no-undef */
 // lwc -services defintion
 const srcFolder = 'src/client';
-const buildFolder = './dist';
+const buildFolder = './src/dist';
 
 module.exports = {
     buildDir: `${buildFolder}`,
@@ -14,7 +14,7 @@ module.exports = {
         },
         {
             from: 'src/client/resources',
-            to: 'dist/resources/'
+            to: 'src/dist/resources/'
         }
     ],
     devServer: { proxy: { '/': 'https://test-service-skwt.onrender.com' } }
