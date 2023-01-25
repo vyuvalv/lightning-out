@@ -13,8 +13,29 @@ export const UserQuery = (username='') => {
                 instanceUrl,
                 accessToken,
                 loginUrl,
+                loggedInUser{ Id Name FirstName LastName Email FullPhotoUrl LanguageLocaleKey LastLoginDate }
+            }
+          }`
+    };
+}
+export const AuthQuery = () => {
+    return {
+        query: `{
+            login {
+                userId,
                 loggedInUser{ Id Name Email FullPhotoUrl LanguageLocaleKey LastLoginDate }
             }
           }`
     };
 }
+
+
+export const UpdateUserQuery = (record = `{ FirstName: "Y"}`) => {
+    
+    return {
+        query: `mutation {
+                updateUser( fields :${record}){  Id Name FirstName LastName Email FullPhotoUrl LanguageLocaleKey LastLoginDate }
+            }`
+    };
+}
+

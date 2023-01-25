@@ -1,0 +1,26 @@
+<template>
+    <div class="slds-grid">
+        <lightning-combobox
+        name="objects"
+        label="Object Name"
+        value={selectedObjectName}
+        placeholder="Select Progress"
+        options={objectOptions}
+        onchange={handleSelectedObject}
+        required
+></lightning-combobox>
+        <lightning-combobox if:true={listViewsOptions.length}
+        name="listviews"
+        label="List view Name"
+        value={selectedlistViewId}
+        placeholder="Select ListView"
+        options={listViewsOptions}
+        onchange={handleSelectedListView}
+        required
+></lightning-combobox>
+<div if:true={listViewDetails}  class="slds-p-around_small">
+    <lightning-textarea value={listViewDetails}></lightning-textarea>
+</div>
+
+    </div>
+</template>

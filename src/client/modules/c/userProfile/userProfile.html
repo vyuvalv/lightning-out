@@ -46,7 +46,7 @@
             </template>
 
             <div class="user-profile-form-actions">
-                <lightning-button-icon icon-name="utility:edit" variant="border" onclick={toggleEditMode}>
+                <lightning-button-icon icon-name={editButtonIcon} variant="border" onclick={toggleEditMode}>
                 </lightning-button-icon>
                 <lightning-button-icon if:false={readonly} class="slds-p-left_small" icon-name="utility:save"
                     variant="brand" onclick={handleSaveUser}></lightning-button-icon>

@@ -5,7 +5,7 @@ const PORT = ''; //http://localhost:3002
  */
 export async function getData(query) {
     const endpoint = `${PORT}/api/graphql`;
-    console.log('query : ' + query.query);
+    console.log('query : ' + JSON.stringify(query.query));
     try {
         const response = await fetch(endpoint, {
             method: 'POST',

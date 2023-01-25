@@ -1,7 +1,7 @@
 /* eslint-disable no-prototype-builtins */
 import { LightningElement, api, track } from 'lwc';
 import { getData, getRecords, createRecord } from 'data/services';
-import { UserQuery } from './data/sfQuery';
+import { UserQuery, UpdateUserQuery } from './data/sfQuery';
 const ENDPOINT = '/api/v1/accounts';
 const FIELDS = ['Name', 'Type'];
 
@@ -174,7 +174,33 @@ export default class App extends LightningElement {
             console.error('cannot login ' + error);
         }
     }
-    
+    userReadOnly = true;
+    async handleUpdateUser(event) {
+        const fields = event.detail;
+        
+        // const record = fields.reduce((rec, field) => {
+        //                     return {...rec, [field.name]: field.value };
+        // }, {});
+        const record = fields.reduce((rec, field) => { return ` ${rec} ${field.name}: "${field.value}",` },"");
+        let recordText = `{${record.substring(0, record.length - 1)}}`;
+        console.log(`record => ${recordText}`);
+        const mutQuery = UpdateUserQuery(recordText);
+        try {
+            const response = await getData(mutQuery);
+            if (response) {
+                console.log('success ' + JSON.stringify(response));
+                this._currentUser = response.data.updateUser;
+                
+                const userProfileComp = this.template.querySelector('c-user-profile');
+                if(userProfileComp)
+                userProfileComp.toggleEditMode();
+             }
+        } catch (error) {
+            console.log('error update record '  +JSON.stringify(error) );
+        }
+       
+
+    }
     get currentUser() {
         return this._currentUser ? this._currentUser : '';
     }

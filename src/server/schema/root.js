@@ -1,28 +1,26 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable no-undef */
-const { GraphQLObjectType, GraphQLSchema, GraphQLString, GraphQLBoolean } = require('graphql');
-const { UserObject, UserUpdateRequest, LoginRequest, LogoutResponse } = require('./models/salesforce');
+const { GraphQLList, GraphQLObjectType, GraphQLSchema, GraphQLString, GraphQLBoolean, GraphQLID } = require('graphql');
+const { ListViewItem, SObjectOptions, UserObject, UserUpdateRequest, LoginRequest, LogoutResponse } = require('./models/salesforce');
 
 const jsforce = require('jsforce');
 require('dotenv').config();
 const { SF_LOGIN_URL, SF_USERNAME, SF_PASSWORD , SF_TOKEN} = process.env;
 
 // Stores in local cache the connection details
-let authDetails;
-let currentUserId = '';
 let activeUser;
-let accessToken = '';
-let orgUrl = '';
+let currentUserId;
+let organizationId;
+let accessToken;
+let loginUrl = SF_LOGIN_URL;
+let orgUrl;
 let connection = {};
 
 // Schema for the Login Authentication and other sequential calls information
-const LoginResponse = new GraphQLObjectType({
-    name: 'LoginResponse',
+const AuthResponse = new GraphQLObjectType({
+    name: 'AuthResponse',
     description: 'Authentication Details',
     fields: () => ({
-        success: { type: GraphQLBoolean },
-        cached: { type: GraphQLBoolean },
-        errorMessage: { type: GraphQLString },
         accessToken: { type: GraphQLString },
         instanceUrl: { type: GraphQLString },
         loginUrl:{ type: GraphQLString },
@@ -41,33 +39,11 @@ const LoginResponse = new GraphQLObjectType({
                 if (activeUser) {
                     return activeUser;
                 }
-                // Get Fields from User Object
-                const userFields = Object.keys(UserObject.getFields()).map(field => field).join(',');
-                // QUERY
-                const soql = `SELECT ${userFields} FROM User WHERE Id='${parentValue.userId}'`;
-                
-                let response = {};
-                console.log('soql query: ' + soql);
-                connection = new jsforce.Connection({
-                        sessionId : parentValue.accessToken,
-                        serverUrl : parentValue.instanceUrl
-                    });
-               
-                // GET RECORD
-                await connection.query(soql, function(err, res) {
-                    if (err) {
-                        throw err;
-                    }
-                    if (res.records) {
-                        console.log('user response: ', res.records);
-                        response = res.records[0];
-                        activeUser = response;
-                    }
-                });
-                return response;
+                // Update DB User
+                activeUser = await getCurrentUser(parentValue.userId, parentValue.accessToken, parentValue.instanceUrl);
+                return { ...activeUser };
             },
         },
-
     })
 });
 
@@ -77,7 +53,7 @@ const RootQuery = new GraphQLObjectType({
     fields: {
         // Login to Salesforce
         login: {
-            type: LoginResponse,
+            type: AuthResponse,
             args: {
                 credentials: { type: LoginRequest },
             },
@@ -85,64 +61,160 @@ const RootQuery = new GraphQLObjectType({
                 parentValue,
                 args
             ) {
-                // Cache details
-                if (authDetails) {
-                    return {
-                        success: true,
-                        cached:true,
-                        ...authDetails,
-                        loggedInUser:activeUser
-                    };
-                }
-                    
+                // Cache details need refresh after certain time
+                let response = AuthResponse;
                 // Get details from client app as input and replace .env details
-                const { username, password, securityToken, instanceUrl } = args.credentials;
-
+                const { username, password, securityToken, instanceUrl } = args.credentials ? args.credentials : {};
                 // simple auth connection
-                connection = new jsforce.Connection({
-                    loginUrl: SF_LOGIN_URL,
-                    instanceUrl
-                });
-                   
-                let response = {};
+                response = loginToOrg(username, password, securityToken);
+               
+                return response;
+            }
+        },
+        getUser: {
+            type: UserObject,
+            args: {
+                userId: { type: GraphQLString },
+            },
+            async resolve(parentValue, args, context) {
+                const { userId } = args;
+                // Update DB
+                activeUser = getCurrentUser(userId, accessToken, orgUrl);
+                return activeUser;
+            },
+        },
+        getAllObjects: {
+            type: SObjectOptions,
+            args: {
+                fieldName: { type: GraphQLString },
+                fieldValue: { type: GraphQLString }
+            },
+            async resolve(
+                parentValue,
+                args
+            ) {
+                let response = {
+                    sobjects: [],
+                };
 
                 try {
-                        // login
-                        await connection.login(username ? username : SF_USERNAME, password && securityToken ? password + securityToken : SF_PASSWORD + SF_TOKEN, (err, userInfo) => {
-                            if (err) {
-                                console.log('Login Error : ' + JSON.stringify(err));
-                                response = {
-                                    success: false,
-                                    errorMessage: `${err.name} : ${err.message}`
-                                };
-                            }
-                            else {
-                                // Stores in cache
-                                authDetails = {
-                                    userId: userInfo.id,
-                                    organizationId: userInfo.organizationId,
-                                    instanceUrl: userInfo.url,
-                                    loginUrl: SF_LOGIN_URL,
-                                    accessToken: connection.accessToken
-                                }
-                                accessToken = connection.accessToken;
-                                currentUserId = userInfo.id;
-                                orgUrl = userInfo.url;
-                                // Build login response
-                                response = {
-                                    success: true,
-                                    cached:false,
-                                    ...authDetails
-                                };
-                            }
-                        });
-                        return response;
+                    connection = new jsforce.Connection({
+                        sessionId: accessToken,
+                        serverUrl: orgUrl
+                    });
+                    const { fieldName, fieldValue } = args;
+
+                    await connection.describeGlobal((err, results) => {
+                        if (err) {
+                            console.error(err);
+                        }
+                       
+                        // ...
+                        if (results && results.sobjects) {
+                            const allObjects = results.sobjects;
+                            let filteredList = [];
+                            
                         
-                    } catch (e) {
-                        console.log(e);
-                        throw e;
-                    }
-            
+                           
+                            filteredList = allObjects.filter(obj => obj.keyPrefix && obj.createable && obj.queryable && obj.deletable || obj.custom);
+                            // if (custom) {
+                            //     filteredList = [...filteredList].filter(obj => obj.custom);
+                            // }
+
+                            if (fieldName && fieldValue) {
+                                filteredList = allObjects.filter(obj => obj[fieldName] === fieldValue || obj.custom);
+                            }
+                            
+                            // // console.log('res.sobjects 1: ' + JSON.stringify(res.sobjects[0]));
+                            response = {
+                                sobjects: filteredList,
+                                total: filteredList.length
+                            }
+                            console.log('Num of SObjects : ' + response.total);
+                        }
+                        
+                      
+                    });
+                   
+                } catch (error) {
+                    console.log(error);
+                    throw new Error('Cannot fetch all sobjects... ' + error.message);
+                }
+
+                return response;
+            }
+                
+        },
+        getListViews: {
+            type: SObjectOptions,
+            args: {
+                objectName: { type: GraphQLString },
+            },
+            async resolve(
+                parentValue,
+                args
+            ) {
+
+                const { objectName } = args;
+                let response = {};
+
+                connection = new jsforce.Connection({
+                    sessionId: accessToken,
+                    serverUrl: orgUrl
+                });
+                if (connection) {
+                    await connection.sobject(objectName).listviews( (err, ret) => {
+                        if (err) {
+                            console.log('ListView Error : ' + JSON.stringify(err));
+                            throw new Error(`${err.name} : ${err.message}`);
+                        }
+                         //console.log('ret : ' + JSON.stringify(ret.listviews));
+                       // const listviewId = ret.listviews[0].id;
+             
+                            response = {
+                                listviews: [...ret.listviews].map(item =>({...item})),
+                                total: ret.listviews.length
+                            }
+                        console.log('response ' + response.total);
+                        return { ...response };
+                    });
+                }
+                return { ...response };
+        }
+        },
+        getListViewDetails: {
+            type: ListViewItem,
+            args: {
+                objectName: { type: GraphQLString },
+                listViewId: { type: GraphQLString },
+            },
+            async resolve(
+                parentValue,
+                args
+            ) {
+
+                const { objectName, listViewId } = args;
+                let response = {};
+                connection = new jsforce.Connection({
+                    sessionId: accessToken,
+                    serverUrl: orgUrl
+                });
+                if (connection) {
+                    await connection.sobject(objectName).listview(listViewId).results((err, res) => {
+                        if (err) {
+                            console.log('ListView Error : ' + JSON.stringify(err.message));
+                            // throw new Error(`${err.name} : ${err.message}`);
+                        }
+                        
+                        const records = res.records.map(rec => rec.columns);
+                        response = {
+                            ...res,
+                            records: records[0]
+                        }
+                        return response;
+                    });
+                }
+                return response;
             }
         },
         // Logout from Salesforce
@@ -157,8 +229,8 @@ const RootQuery = new GraphQLObjectType({
 
                 try {
                     connection = new jsforce.Connection({
-                        sessionId : authDetails.accessToken,
-                        serverUrl : authDetails.instanceUrl
+                        sessionId : accessToken,
+                        serverUrl : orgUrl
                     });
 
                     await connection.logout(function(err) {
@@ -177,7 +249,7 @@ const RootQuery = new GraphQLObjectType({
                     });
                 } catch (error) {
                     console.log(error);
-                   throw error;
+                    throw new Error('Cannot Logout... ' + error.message );
                 }
                 return response;
             }
@@ -189,7 +261,7 @@ const MutationOperations = new GraphQLObjectType({
     name: 'CRUD',
     description: 'crud operations',
     fields: {
-        update: {
+        updateUser: {
             type: UserObject,
             args: {
                 fields: { type: UserUpdateRequest },
@@ -199,42 +271,104 @@ const MutationOperations = new GraphQLObjectType({
                 args
             ) {
                 const { fields } = args;
-                let response = {};
-                connection = new jsforce.Connection({
-                    sessionId : accessToken,
-                    serverUrl : orgUrl
-                });
-                // Update Use Fields
-                await connection.sobject("User").update({...fields, Id:currentUserId}, (err, ret) => {
-                    if (err || !ret.success) {
-                        
-                        const errMessage = {
-                            success: false,
-                            errorMessage: `${err.message} - Code : ${err.errorCode} : ${err.fields}`
-                        };
-                        console.log(errMessage);
-                        response = {
-                            ...UserObject, ...fields, State: 'Failed',
-                        }
-                    }
-                
-                    console.log('Updated Successfully : ' + ret.id);
-                    // Update DB
-                    activeUser = { ...activeUser, ...fields };
-
-                    response = {
-                        ...activeUser, Id :ret.id,State: 'Success',
-                    };
-                    
-                  });
-
-                  return { ...response };
+                if (!currentUserId || !accessToken) {
+                    throw new Error('Must Login before update...');
+                }
                
+                const updatedId = await updateRecord("User", currentUserId, fields, accessToken, orgUrl);
+                // Update DB
+                activeUser = getCurrentUser(updatedId, accessToken, orgUrl);
+                return activeUser;
+            
         }
     },
     }
 });
 
+
+async function loginToOrg(username, password, securityToken ) { 
+
+    connection = new jsforce.Connection({loginUrl});
+    let authObject = AuthResponse;
+    try {
+        // login
+        await connection.login(username ? username : SF_USERNAME, password && securityToken ? password + securityToken : SF_PASSWORD + SF_TOKEN, (err, userInfo) => {
+            if (err) {
+                console.log('Login Error : ' + JSON.stringify(err));
+                throw new Error(`${err.name} : ${err.message}`);
+            }
+           
+            // Stores in cache
+            accessToken = connection.accessToken;
+            currentUserId = userInfo.id;
+            organizationId = userInfo.organizationId;
+            orgUrl = userInfo.url;
+            console.log('accessToken : ' + accessToken);
+            // Build login response
+            authObject = {
+                userId: currentUserId,
+                organizationId: organizationId,
+                loginUrl,
+                instanceUrl: orgUrl,
+                accessToken: connection.accessToken,
+            };
+            
+        });
+        return authObject;
+            
+    } catch (error) {
+        throw new Error(`Failed to login => ${error.message}`);
+    }
+}
+async function getCurrentUser(userId, sessionId, serverUrl) {
+    let output = {};
+    // Restore connection session 
+    connection = new jsforce.Connection({ sessionId, serverUrl });
+    // Get Fields from User Object
+    const userFields = Object.keys(UserObject.getFields()).map(field => field).join(',');
+    // QUERY
+    const soql = `SELECT ${userFields} FROM User WHERE Id='${userId}'`;
+    // GET RECORD
+    try {
+        await connection.query(soql, function(err, res) {
+            if (err) {
+                throw err;
+            }
+            if (res.records) {
+                console.log('refreshed User ', res.records[0]);
+                output = { ...res.records[0] };
+            }
+            return output;
+        });
+    } catch (error) {
+        throw new Error(`Failed to get User => ${error.message}`);
+    }
+   
+    return output;
+}
+async function updateRecord(objectName="User", recordId, fields, sessionId, serverUrl) {
+    let outputId = {};
+    // Restore connection session 
+    connection = new jsforce.Connection({ sessionId, serverUrl });
+
+// GET RECORD
+try {
+    await connection.sobject(objectName).update({...fields, Id:recordId}, (err, ret) => {
+        if (err || !ret.success) {
+            throw new Error(`${err.message} - Code : ${err.errorCode} : ${err.fields}`);
+        }
+        console.log('Updated Successfully : ' + ret.id);
+        outputId = ret.id;
+        return outputId;
+        //  // Update DB
+        // activeUser = getCurrentUser(ret.id, accessToken, orgUrl);
+    });
+} catch (error) {
+    throw new Error(`Failed to get User => ${error.message}`);
+}
+
+return outputId;
+}
 
 module.exports = new GraphQLSchema({
     query: RootQuery,

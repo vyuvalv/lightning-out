@@ -29,6 +29,7 @@
             <c-user-profile
                 if:true={activeUserId}
                 user={currentUser}
+                onsave={handleUpdateUser}
             ></c-user-profile>
             
             <lightning-button-icon

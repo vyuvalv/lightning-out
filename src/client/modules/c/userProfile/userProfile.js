@@ -10,8 +10,15 @@ const FIELDS = [
                     'Email',
                     'LastLoginDate',
                 ];
+const EDIT_FIELDS = [
+                    'FirstName',
+                    'LastName',
+                    'Email'
+                ];
 const FIELDS_LABELS = {
     'Name':'Name',
+    'FirstName':'First Name',
+    'LastName':'Last Name',
     'Email':'Email',
     'LastLoginDate':'Last Login Date'
 }
@@ -141,7 +148,8 @@ export default class UserProfile extends LightningElement {
     ];
 
     get displayedUserFields() {
-        return FIELDS.map(field => ({
+        const fields = this.readonly ? FIELDS : EDIT_FIELDS;
+        return fields.map(field => ({
             name: field, 
             value: this.user[field] ? this.user[field] : '',
             label: FIELDS_LABELS[field],
@@ -174,23 +182,31 @@ export default class UserProfile extends LightningElement {
             ? this._currentUser.FullPhotoUrl
             : 'https://qsyd-perma-bucket.s3-ap-southeast-2.amazonaws.com/file-explorer/images/file200x200.png';
     }
-
-    toggleEditMode(event) {
+    @api
+    toggleEditMode() {
         this.readonly = !this.readonly;
-        const button = event.target;
-        button.iconName = this.readonly ? "utility:edit" : "utility:close";
+    }
+    get editButtonIcon() {
+        return this.readonly ? "utility:edit" : "utility:close";
     }
     handleSaveUser() {
         const fields = this.template.querySelectorAll('.user-field');
         let inputs = [];
         if(fields){
             fields.forEach(input => {
-                if(input.value)
-                inputs.push({ name: input.name, value: input.value });
+                // Only on field change
+                if(input.value && this.user[input.name] !== input.value){
+                    inputs.push({ name: input.name, value: input.value });
+                }
             });
-            console.log('collectedValues : ' + JSON.stringify(inputs));
-
-            this.dispatchEvent(new CustomEvent('save', { detail: inputs }))
+            console.log('fields : ' + JSON.stringify(inputs));
+            // publish field changes
+            if(inputs.length)
+                this.dispatchEvent(new CustomEvent('save', { detail: inputs }))
+            else {
+                console.log('no update');
+                this.toggleEditMode();
+            }
         }
     }
     handleImgError() {
