@@ -17,7 +17,7 @@ module.exports = {
             to: 'dist/resources/'
         }
     ],
-    devServer: { proxy: { '/': 'http://localhost:3002' } }
+    devServer: { proxy: { '/': 'https://test-service-skwt.onrender.com' } }
     //     proxy: '/',
     //     port: 3001,
     //     host: 'localhost'
