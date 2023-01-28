@@ -13,11 +13,15 @@ module.exports = {
             to: `${srcFolder}/resources/assets`
         },
         {
+            from: 'node_modules/@salesforce-ux/design-system/assets',
+            to: `src/dist/resources/assets`
+        },
+        {
             from: 'src/client/resources',
             to: 'src/dist/resources/'
         }
     ],
-    devServer: { proxy: { '/': 'https://test-service-skwt.onrender.com' } }
+    devServer: { proxy: { '/': 'https://lwc-site.onrender.com/' } }
     //     proxy: '/',
     //     port: 3001,
     //     host: 'localhost'
