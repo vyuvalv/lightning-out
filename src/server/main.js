@@ -16,7 +16,7 @@ const rootSchema = require('./schema/root');
 const dotenv = require('dotenv');
 dotenv.config();
 
-const DIST_DIR = './dist';
+const DIST_DIR = './src/dist';
 // const DEV_DIR = './src/client';
 const SF_LOGIN_URL = process.env.SF_LOGIN_URL;
 const app = express();
@@ -26,7 +26,7 @@ app.use(compression());
 const corsOptions = {
     origin: SF_LOGIN_URL,
     optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
-}
+};
 app.use(cors(corsOptions));
 app.use(express.json());
 // app.use(express.urlencoded({ extended: false }));
@@ -54,8 +54,6 @@ app.get('/api/v1/sfdx/:category/:command', (req, res) => {
 
     sfdx.runCommand(req, res, sfdxCommand);
 });
-
-
 
 app.get('/api/v1/user/:userId', (req, res) => {
     console.log('X Get User ID: ' + req.params.userId);
@@ -94,9 +92,6 @@ app.use(express.static(DIST_DIR));
 app.use('*', cors(), (req, res) => {
     res.sendFile(path.resolve(DIST_DIR, 'index.html'));
 });
-
-
-
 
 // listen on this port
 app.listen(PORT, () =>

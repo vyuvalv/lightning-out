@@ -1,4 +1,4 @@
-const PORT = 'http://localhost:3001'; // http://localhost:3002
+const PORT = ''; // http://localhost:3002
 
 /*
  * Interact with GraphQL Data From Server
