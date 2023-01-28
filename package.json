@@ -72,6 +72,6 @@
         "watch:client": "lwc-services watch",
         "watch:server": "nodemon",
         "watch": "run-p watch:client watch:server",
-        "serve": "node ./src/server/main.js"
+        "start": "node ./src/server/main.js"
     }
 }
