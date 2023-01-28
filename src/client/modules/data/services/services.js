@@ -1,4 +1,4 @@
-const PORT = ''; //http://localhost:3002
+const PORT = 'http://localhost:3002'; //
 
 /*
  * Interact with GraphQL Data From Server
@@ -11,8 +11,8 @@ export async function getData(query) {
             method: 'POST',
             mode: 'cors',
             headers: {
-                "Content-Type": "application/json",
-                "Accept": "application/json"
+                'Content-Type': 'application/json',
+                Accept: 'application/json'
             },
             body: JSON.stringify(query)
         });
@@ -25,7 +25,6 @@ export async function getData(query) {
     }
 }
 
-
 export async function getActiveOrgs() {
     const response = await fetch(`${PORT}/api/v1/sfdx/org/list`);
     if (!response.ok) {
@@ -33,7 +32,6 @@ export async function getActiveOrgs() {
     }
     return response.json();
 }
-
 
 export const getRecords = endpoint =>
     fetch(endpoint)

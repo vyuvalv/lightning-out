@@ -21,7 +21,7 @@ module.exports = {
             to: 'src/dist/resources/'
         }
     ],
-    devServer: { proxy: { '/': 'https://lwc-site.onrender.com/' } }
+    devServer: { proxy: { '/': 'https://localhost/3002' } }
     //     proxy: '/',
     //     port: 3001,
     //     host: 'localhost'
