@@ -5,9 +5,17 @@
         variant="border-filled"
         onclick={renderLightningOut}
     ></lightning-button>
-
+    <lightning-spinner
+        if:true={loading}
+        variant="brand"
+        alternative-text="loading.."
+    ></lightning-spinner>
     <!-- Container is used to control the theme of the site -->
-    <ui-container links={sidebarActions} onnavigate={handleMenuItemSelect} ontoggle={handleLoginUser}>
+    <ui-container
+        links={sidebarActions}
+        onnavigate={handleMenuItemSelect}
+        ontoggle={handleLoginUser}
+    >
         <!-- Left Sidebar -->
         <div slot="sidebar">
             <ui-sidebar
@@ -31,7 +39,7 @@
                 user={currentUser}
                 onsave={handleUpdateUser}
             ></c-user-profile>
-            
+
             <lightning-button-icon
                 icon-name="utility:add"
                 variant="border-filled"
