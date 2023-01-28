@@ -3,7 +3,7 @@ import '@lwc/synthetic-shadow';
 // import { registerWireService } from '@lwc/wire-service';
 import { createElement } from 'lwc';
 import MainApp from 'ui/app';
-
+const SERVER_URL = `https://test-service-skwt.onrender.com`; //'http://localhost:3001'
 // router
 // const startingLocation = window.location.pathname;
 
@@ -16,7 +16,7 @@ let scriptPromise;
 
 window.addEventListener('DOMContentLoaded', () => {
     const pageName = document.location.search.substr(6).split('?page=');
-    if(pageName){
+    if (pageName) {
         console.log(`initial page: ${pageName}`);
         app.pathName = pageName;
         element.appendChild(app);
@@ -41,7 +41,7 @@ window.addEventListener(
     'message',
     event => {
         // Block any event not coming form domain
-        if (event.origin !== 'http://localhost:3001') return;
+        if (event.origin !== SERVER_URL) return;
 
         console.log('event data: ' + JSON.stringify(event.data));
         const componentName = 'lightning:button';
