@@ -22,7 +22,7 @@ const NAV_ACTIONS = [
         iconName: 'utility:settings'
     }
 ];
-
+const SERVER_URL = `https://test-service-skwt.onrender.com`;
 export default class App extends LightningElement {
     @api
     get pathName() {
@@ -71,7 +71,7 @@ export default class App extends LightningElement {
                 accessToken: this.accessToken,
                 instanceUrl: this.instanceUrl
             },
-            'http://localhost:3001'
+            SERVER_URL
         );
     }
 
