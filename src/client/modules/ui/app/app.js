@@ -35,7 +35,7 @@ export default class App extends LightningElement {
     sidebarActions = NAV_ACTIONS;
 
     _currentUser;
-
+    loading = false;
     handleMenuItemSelect(event) {
         const { actionName } = event.detail;
         this.addToBrowserHistory(actionName);
@@ -56,7 +56,7 @@ export default class App extends LightningElement {
             );
         }
     }
-   
+
     results = '';
     @track records = [];
 
@@ -112,9 +112,8 @@ export default class App extends LightningElement {
         console.log('login');
         if (this.loggedIn) {
             this.rightSideBarOpen = !this.rightSideBarOpen;
-            this.toggleRightSidebar( this.rightSideBarOpen);
-        }
-        else {
+            this.toggleRightSidebar(this.rightSideBarOpen);
+        } else {
             console.log('nologin');
             this.activeUserId = '';
             this.loginToOrg();
@@ -136,8 +135,7 @@ export default class App extends LightningElement {
     }
     toggleRightSidebar(toggle = true) {
         const container = this.template.querySelector('ui-container');
-        if(container)
-        container.toggleRightPanel(toggle);
+        if (container) container.toggleRightPanel(toggle);
     }
 
     async loginToOrg() {
@@ -147,18 +145,30 @@ export default class App extends LightningElement {
             const response = await getData(graphQuery);
             if (response) {
                 const details = response.data.login;
-                
+
                 this.activeUserId = details.userId;
                 this.accessToken = details.accessToken;
                 this.instanceUrl = details.loginUrl;
                 this.orgId = details.organizationId;
-             
-                console.log('details.loggedInUser : ' + JSON.stringify(details.loggedInUser));
+
+                console.log(
+                    'details.loggedInUser : ' +
+                        JSON.stringify(details.loggedInUser)
+                );
                 // Set login detail in session storage
-                window.sessionStorage.setItem('sf_accessToken', details.accessToken);
-                window.sessionStorage.setItem('sf_instanceUrl', details.loginUrl);
+                window.sessionStorage.setItem(
+                    'sf_accessToken',
+                    details.accessToken
+                );
+                window.sessionStorage.setItem(
+                    'sf_instanceUrl',
+                    details.loginUrl
+                );
                 window.sessionStorage.setItem('sf_userId', details.userId);
-                window.sessionStorage.setItem('sf_orgId', details.organizationId);
+                window.sessionStorage.setItem(
+                    'sf_orgId',
+                    details.organizationId
+                );
                 // Sets Logged In flag
                 this.loggedIn = true;
                 // Get User Details
@@ -177,11 +187,13 @@ export default class App extends LightningElement {
     userReadOnly = true;
     async handleUpdateUser(event) {
         const fields = event.detail;
-        
+
         // const record = fields.reduce((rec, field) => {
         //                     return {...rec, [field.name]: field.value };
         // }, {});
-        const record = fields.reduce((rec, field) => { return ` ${rec} ${field.name}: "${field.value}",` },"");
+        const record = fields.reduce((rec, field) => {
+            return ` ${rec} ${field.name}: "${field.value}",`;
+        }, '');
         let recordText = `{${record.substring(0, record.length - 1)}}`;
         console.log(`record => ${recordText}`);
         const mutQuery = UpdateUserQuery(recordText);
@@ -190,16 +202,15 @@ export default class App extends LightningElement {
             if (response) {
                 console.log('success ' + JSON.stringify(response));
                 this._currentUser = response.data.updateUser;
-                
-                const userProfileComp = this.template.querySelector('c-user-profile');
-                if(userProfileComp)
-                userProfileComp.toggleEditMode();
-             }
-        } catch (error) {
-            console.log('error update record '  +JSON.stringify(error) );
-        }
-       
 
+                const userProfileComp = this.template.querySelector(
+                    'c-user-profile'
+                );
+                if (userProfileComp) userProfileComp.toggleEditMode();
+            }
+        } catch (error) {
+            console.log('error update record ' + JSON.stringify(error));
+        }
     }
     get currentUser() {
         return this._currentUser ? this._currentUser : '';

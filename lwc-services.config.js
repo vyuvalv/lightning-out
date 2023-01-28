@@ -21,7 +21,7 @@ module.exports = {
             to: 'src/dist/resources/'
         }
     ],
-    devServer: { proxy: { '/': 'https://localhost/3002' } }
+    devServer: { proxy: { '/': 'http://localhost:3002' } }
     //     proxy: '/',
     //     port: 3001,
     //     host: 'localhost'
