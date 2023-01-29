@@ -23,6 +23,7 @@ const NAV_ACTIONS = [
     }
 ];
 const SERVER_URL = `https://test-service-skwt.onrender.com`;
+// const DEV_SERVER = `http://localhost:3001`;
 export default class App extends LightningElement {
     @api
     get pathName() {
@@ -65,9 +66,12 @@ export default class App extends LightningElement {
         console.log('app path ' + this.pathName);
     }
     renderLightningOut() {
+        console.log('post message to: ' + SERVER_URL);
         // Post Message to main index.js to render lightning out
         window.postMessage(
             {
+                componentName: 'c:webActions',
+                componentParams: { primaryId: '123' },
                 accessToken: this.accessToken,
                 instanceUrl: this.instanceUrl
             },

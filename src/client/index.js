@@ -3,7 +3,9 @@ import '@lwc/synthetic-shadow';
 // import { registerWireService } from '@lwc/wire-service';
 import { createElement } from 'lwc';
 import MainApp from 'ui/app';
-const SERVER_URL = `https://test-service-skwt.onrender.com`; //'http://localhost:3001'
+
+const DEV_SERVER = `http://localhost:3001`;
+const SERVER_URL = `https://test-service-skwt.onrender.com`; //
 // router
 // const startingLocation = window.location.pathname;
 
@@ -36,23 +38,26 @@ window.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-let counter = 0;
+
 window.addEventListener(
     'message',
     event => {
+        console.log('event.origin2: ' + event.origin);
         // Block any event not coming form domain
-        if (event.origin !== SERVER_URL) return;
+        if (event.origin !== SERVER_URL && event.origin !== DEV_SERVER) return;
 
-        console.log('event data: ' + JSON.stringify(event.data));
-        const componentName = 'lightning:button';
+        console.log('event data1: ' + JSON.stringify(event.data));
+        let componentName = 'lightning:button';
         // const componentName = "c:logger";
         let componentParams = { label: 'helloworld' };
         const divId = 'lex';
-
+    
         if (!event.data.type) {
             // not on init event
             accessToken = event.data.accessToken;
             instanceUrl = event.data.instanceUrl;
+            componentName = event.data.componentName;
+            componentParams = event.data.componentParams;
 
             if (accessToken && instanceUrl) {
                 const lexUrl = instanceUrl.replace(
@@ -65,8 +70,7 @@ window.addEventListener(
                 }
 
                 scriptPromise.then(() => {
-                    console.log('script run ');
-                    componentParams = { label: 'init button' };
+                    console.log('script run ', componentParams);
                     renderLexApp(
                         componentName,
                         componentParams,
@@ -86,7 +90,7 @@ window.addEventListener(
                         'my.salesforce.com',
                         'lightning.force.com/'
                     );
-                    componentParams = { label: 'run button ' + counter };
+                
                     renderLexApp(
                         componentName,
                         componentParams,
@@ -96,7 +100,7 @@ window.addEventListener(
                     );
                 }
             }
-            counter++;
+        
         }
     },
     false
@@ -151,7 +155,7 @@ function renderLexApp(
     parentDiv.appendChild(childDiv);
 
     window.$Lightning.use(
-        'c:actionsApp',
+        'c:ossWebApp',
         () => {
             window.$Lightning.createComponent(
                 componentName,

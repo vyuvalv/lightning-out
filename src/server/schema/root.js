@@ -4,15 +4,16 @@ const { GraphQLList, GraphQLObjectType, GraphQLSchema, GraphQLString, GraphQLBoo
 const { ListViewItem, SObjectOptions, UserObject, UserUpdateRequest, LoginRequest, LogoutResponse } = require('./models/salesforce');
 
 const jsforce = require('jsforce');
-require('dotenv').config();
-const { SF_LOGIN_URL, SF_USERNAME, SF_PASSWORD , SF_TOKEN} = process.env;
+const dotenv = require('dotenv');
+dotenv.config();
+const { SF_LOGIN_URL, SF_INSTANCE_URL, SF_USERNAME, SF_PASSWORD , SF_TOKEN} = process.env;
 
 // Stores in local cache the connection details
 let activeUser;
 let currentUserId;
 let organizationId;
 let accessToken;
-let loginUrl = SF_LOGIN_URL;
+let loginUrl = SF_INSTANCE_URL;
 let orgUrl;
 let connection = {};
 
@@ -287,8 +288,11 @@ const MutationOperations = new GraphQLObjectType({
 
 
 async function loginToOrg(username, password, securityToken ) { 
-
-    connection = new jsforce.Connection({loginUrl});
+    console.log('loggin in as : ' + SF_USERNAME);
+    connection = new jsforce.Connection({
+        loginUrl: SF_LOGIN_URL,
+        instanceUrl: SF_INSTANCE_URL
+    });
     let authObject = AuthResponse;
     try {
         // login
@@ -335,7 +339,7 @@ async function getCurrentUser(userId, sessionId, serverUrl) {
                 throw err;
             }
             if (res.records) {
-                console.log('refreshed User ', res.records[0]);
+                console.log(`refreshed User ... ${userId}`);
                 output = { ...res.records[0] };
             }
             return output;

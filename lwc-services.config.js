@@ -13,12 +13,12 @@ module.exports = {
             to: `${srcFolder}/resources/assets`
         },
         {
-            from: 'node_modules/@salesforce-ux/design-system/assets',
-            to: `src/dist/resources/assets`
-        },
-        {
             from: 'src/client/resources',
             to: 'src/dist/resources/'
+        },
+        {
+            from: 'node_modules/@salesforce-ux/design-system/assets',
+            to: `src/dist/resources/assets`
         }
     ],
     devServer: { proxy: { '/': 'http://localhost:3002' } }

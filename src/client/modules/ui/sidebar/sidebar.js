@@ -30,6 +30,7 @@ export default class Sidebar extends LightningElement {
     _pathName = '';
 
     onSelectAction(event) {
+        if(event.target){
         const actionBox = event.target.classList.contains('action-box')
             ? event.target
             : event.target.closest('.action-box');
@@ -40,6 +41,6 @@ export default class Sidebar extends LightningElement {
             new CustomEvent('select', {
                 detail: actionName
             })
-        );
+        );}
     }
 }
