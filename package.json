@@ -45,6 +45,9 @@
         ],
         "./src/**/*.js": [
             "eslint"
+        ],
+        "!(./src/SF_Org)*.*": [
+            "eslint"
         ]
     },
     "nodemonConfig": {

@@ -14,7 +14,7 @@ const { graphqlHTTP } = require('express-graphql');
 const rootSchema = require('./schema/root');
 
 const dotenv = require('dotenv');
-dotenv.config();
+dotenv.config( {path: path.resolve('.env-web')});
 
 const DIST_DIR = './src/dist';
 // const DEV_DIR = './src/client';

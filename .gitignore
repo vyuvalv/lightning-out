@@ -28,10 +28,12 @@ ehthumbs.db
 [Dd]esktop.ini
 $RECYCLE.BIN/
 
-src/dist/resources/assets
-src/client/resources/assets
+# src/dist/resources/assets
+# src/client/resources/assets
 package-lock.json
 .gitignore
 .env
 src/SF_Org/scripts
 electron
+.sf
+
