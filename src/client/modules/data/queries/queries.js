@@ -1,23 +1,35 @@
-export const UserQuery = (username='') => {
+export const AuthLoginQuery = (username, password, securityToken, loginUrl) => {
     return {
         query: `{
             login( 
               credentials : {
                 username:"${username}", 
-                password:"",
-                securityToken:"",
-                instanceUrl:""
+                password:"${password}",
+                securityToken:"${securityToken}",
+                instanceUrl:"${loginUrl}"
               }){
                 userId,
                 organizationId,
                 instanceUrl,
-                accessToken,
+                lightningUrl,
                 loginUrl,
+                accessToken,
                 loggedInUser{ Id Name FirstName LastName Email FullPhotoUrl LanguageLocaleKey LastLoginDate }
             }
           }`
     };
 }
+export const CredentialsQuery =  {
+        query: `{
+            getEnvParameters{
+             loginUrl
+             username
+             password
+             securityToken
+           }
+        }`
+    };
+
 export const AuthQuery = () => {
     return {
         query: `{
@@ -28,7 +40,15 @@ export const AuthQuery = () => {
           }`
     };
 }
-
+export const UserDataQuery = (userId='') => {
+    return {
+        query: `{
+            getUser (userId:"${userId}"){
+                Id Name FirstName LastName  Email FullPhotoUrl LanguageLocaleKey LastLoginDate
+            }
+          }`
+    };
+}
 
 export const UpdateUserQuery = (record = `{ FirstName: "Y"}`) => {
     

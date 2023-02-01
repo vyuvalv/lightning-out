@@ -32,21 +32,10 @@
     cursor:pointer;
     animation: appear 2s;
 }  */
-.user-profile-header-actions {
-    display: flex;
-    justify-content: flex-end;
-    background-color: #cfcfcf;
-    border-bottom: 1px solid #dddbda;
-    padding: 0.3rem 0.1rem;
-}
 .user-profile-form-actions {
     display: flex;
-    border-top: 1px solid #dddbda;
-    border-bottom: 1px solid #dddbda;
-    background-color: #cfcfcf;
-    margin: 0.5rem 0;
-    padding: 0.3rem 0.1rem;
-    justify-content: space-between;
+    padding: 0.5rem;
+    justify-content: flex-end;
 }
 
 @keyframes appear {

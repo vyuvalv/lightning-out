@@ -1,12 +1,14 @@
 <template>
+    <!-- Panel -->
     <div class="user-profile-container slds-border_bottom slds-m-bottom_x-small">
+        <!-- Profile Image Header -->
         <div class="user-profile-background">
-            <!-- header -->
             <div class="slds-grid slds-p-around_xx-small">
                 <div class="slds-col">
-                    <p class="slds-text-align_center slds-text-heading_small slds-p-around_x-small">
-                        {greeting}
-                    </p>
+                    <div class="slds-text-align_center slds-text-heading_small slds-p-around_x-small">
+                        <p>{greeting}</p>
+                        <p>{userFullName}</p>
+                    </div>
                 </div>
                 <div class="slds-col_bump-left">
                     <lightning-button-menu variant="border-filled" onselect={onSelectAction}
@@ -18,15 +20,16 @@
             </div>
             <!-- Image -->
             <div class="user-profile-image" if:true={userProfileImage}>
-                <img src={userProfileImage} onerror={handleImgError}></img>
+                <img src={userProfileImage} onerror={handleImgError}/>
             </div>
         </div>
+        <!-- Language Settings -->
         <div class="slds-grid user-details-panel slds-p-around_x-small">
             <div class="slds-col">
             </div>
 
             <div class="slds-col_bump-left" onmouseover={onLanguageHover} onmouseout={onLanguageHoverOut}>
-                <img src={imageTest} class="language-flag" />
+                <img src={currentUserLanguage.image} class="language-flag" />
                 <lightning-button-menu nubbin="top" class="language-edit-button" variant="bare"
                                         onselect={handleChangeLanguage} alternative-text="Show menu" icon-size="x-small"
                                         menu-alignment="right">
@@ -36,20 +39,41 @@
                     </template>
                 </lightning-button-menu>
             </div>
-
-
         </div>
+        <!-- User Profile Form Panel -->
         <div class="user-profile-fields">
+            <div class="user-profile-header-actions">
+                <!-- Refresh User -->
+                <lightning-button-icon if:false={loginModeButtons} icon-name="utility:refresh"
+                    variant="border" data-name="refresh" onclick={handleButtonClicked}></lightning-button-icon>
+                <!-- Refresh User -->
+                <lightning-button-icon if:true={loginModeButtons} icon-name="utility:privately_shared"
+                    variant="border" data-name="autocomplete" onclick={handleButtonClicked}></lightning-button-icon>
+            </div>
+            <!-- User Profile Form -->
             <template for:each={displayedUserFields} for:item="field">
-                <lightning-input key={field.name} class={field.className} name={field.name} label={field.label}
-                    value={field.value} readonly={readonly}></lightning-input>
+                <lightning-input key={field.name} type={field.type} class={field.className} name={field.name} label={field.label}
+                    value={field.value} readonly={readonly} required></lightning-input>
             </template>
 
+            <!-- User Profile Footer Actions -->
             <div class="user-profile-form-actions">
-                <lightning-button-icon icon-name={editButtonIcon} variant="border" onclick={toggleEditMode}>
+                <div>
+                <!-- Logout -->
+                <lightning-button-icon if:false={loginModeButtons} icon-name="utility:unlock"
+                    variant="error" data-name="logout" onclick={handleButtonClicked}></lightning-button-icon>
+                </div>
+                <div>
+                <!-- Edit -->
+                <lightning-button-icon if:false={loginModeButtons} icon-name={editButtonIcon} variant="border" onclick={toggleEditMode}>
                 </lightning-button-icon>
-                <lightning-button-icon if:false={readonly} class="slds-p-left_small" icon-name="utility:save"
-                    variant="brand" onclick={handleSaveUser}></lightning-button-icon>
+                <!-- Update -->
+                <lightning-button-icon if:false={loginModeButtons} class="slds-p-left_small" icon-name="utility:save"
+                    variant="success" data-name="update" onclick={handleButtonClicked}></lightning-button-icon>
+                <!-- Login -->
+                <lightning-button-icon if:true={loginModeButtons} class="slds-p-left_small" icon-name="utility:lock"
+                    variant="brand" data-name="login" onclick={handleButtonClicked}></lightning-button-icon>
+                </div>
             </div>
         </div>
     </div>

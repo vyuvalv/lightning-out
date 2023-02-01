@@ -23,8 +23,8 @@ export default class Banner extends LightningElement {
                             details.accessToken
                         );
                         window.sessionStorage.setItem(
-                            'sf_instanceUrl',
-                            details.instanceUrl
+                            'sf_loginUrl',
+                            details.loginUrl
                         );
                         window.sessionStorage.setItem(
                             'sf_userId',

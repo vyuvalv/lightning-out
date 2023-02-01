@@ -16,7 +16,16 @@ let accessToken;
 let loginUrl = SF_INSTANCE_URL;
 let orgUrl;
 let connection = {};
-
+const ServerCredentials = new GraphQLObjectType({
+    name: 'ServerCredentials',
+    description: 'Env Variables',
+    fields: () => ({
+        loginUrl: { type: GraphQLString },
+        username: { type: GraphQLString },
+        password: { type: GraphQLString },
+        securityToken: { type: GraphQLString },
+    })
+});
 // Schema for the Login Authentication and other sequential calls information
 const AuthResponse = new GraphQLObjectType({
     name: 'AuthResponse',
@@ -25,6 +34,15 @@ const AuthResponse = new GraphQLObjectType({
         accessToken: { type: GraphQLString },
         instanceUrl: { type: GraphQLString },
         loginUrl:{ type: GraphQLString },
+        lightningUrl: {
+            type: GraphQLString,
+            async resolve(parentValue) {
+                return parentValue ? parentValue.loginUrl.replace(
+                    'my.salesforce.com',
+                    'lightning.force.com/'
+                ):'';
+            },
+        },
         userId: { type: GraphQLString },
         organizationId: { type: GraphQLString },
         loggedInDate: {
@@ -41,7 +59,7 @@ const AuthResponse = new GraphQLObjectType({
                     return activeUser;
                 }
                 // Update DB User
-                activeUser = await getCurrentUser(parentValue.userId, parentValue.accessToken, parentValue.instanceUrl);
+                activeUser = await getCurrentUser(parentValue.userId, parentValue.accessToken, parentValue.loginUrl);
                 return { ...activeUser };
             },
         },
@@ -67,10 +85,22 @@ const RootQuery = new GraphQLObjectType({
                 // Get details from client app as input and replace .env details
                 const { username, password, securityToken, instanceUrl } = args.credentials ? args.credentials : {};
                 // simple auth connection
-                response = loginToOrg(username, password, securityToken);
+                response = loginToOrg(instanceUrl, username, password, securityToken);
                
                 return response;
             }
+        },
+        getEnvParameters: {
+            type: ServerCredentials,
+            args: {},
+            async resolve() {
+                return {
+                    loginUrl: SF_LOGIN_URL,
+                    username: SF_USERNAME,
+                    password: SF_PASSWORD,
+                    securityToken: SF_TOKEN,
+                };
+            },
         },
         getUser: {
             type: UserObject,
@@ -287,16 +317,15 @@ const MutationOperations = new GraphQLObjectType({
 });
 
 
-async function loginToOrg(username, password, securityToken ) { 
+async function loginToOrg(sfUrl, username, password, securityToken ) { 
     console.log('loggin in as : ' + SF_USERNAME);
     connection = new jsforce.Connection({
-        loginUrl: SF_LOGIN_URL,
-        instanceUrl: SF_INSTANCE_URL
+        loginUrl: sfUrl
     });
     let authObject = AuthResponse;
     try {
         // login
-        await connection.login(username ? username : SF_USERNAME, password && securityToken ? password + securityToken : SF_PASSWORD + SF_TOKEN, (err, userInfo) => {
+        await connection.login(username, password + securityToken, (err, userInfo) => {
             if (err) {
                 console.log('Login Error : ' + JSON.stringify(err));
                 throw new Error(`${err.name} : ${err.message}`);

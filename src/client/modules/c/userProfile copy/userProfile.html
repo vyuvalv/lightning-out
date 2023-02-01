@@ -1,0 +1,66 @@
+<template>
+    <div class="user-profile-container slds-border_bottom slds-m-bottom_x-small">
+        <div class="user-profile-background">
+            <!-- header -->
+            <div class="slds-grid slds-p-around_xx-small">
+                <div class="slds-col">
+                    <p class="slds-text-align_center slds-text-heading_small slds-p-around_x-small">
+                        {greeting}
+                    </p>
+                </div>
+                <div class="slds-col_bump-left">
+                    <lightning-button-menu variant="border-filled" onselect={onSelectAction}
+                                            alternative-text="Show menu" icon-size="x-small" menu-alignment="right">
+                        <lightning-menu-item value="viewProfile" label="View Profile"></lightning-menu-item>
+                        <lightning-menu-item value="editUser" label="Edit User"></lightning-menu-item>
+                    </lightning-button-menu>
+                </div>
+            </div>
+            <!-- Image -->
+            <div class="user-profile-image" if:true={userProfileImage}>
+                <img src={userProfileImage} onerror={handleImgError}></img>
+            </div>
+        </div>
+        <div class="slds-grid user-details-panel slds-p-around_x-small">
+            <div class="slds-col">
+            </div>
+
+            <div class="slds-col_bump-left" onmouseover={onLanguageHover} onmouseout={onLanguageHoverOut}>
+                <img src={imageTest} class="language-flag" />
+                <lightning-button-menu nubbin="top" class="language-edit-button" variant="bare"
+                                        onselect={handleChangeLanguage} alternative-text="Show menu" icon-size="x-small"
+                                        menu-alignment="right">
+                    <template for:each={languages} for:item="lang">
+                        <lightning-menu-item key={lang.value} value={lang.value} label={lang.label}
+                            checked={lang.active}></lightning-menu-item>
+                    </template>
+                </lightning-button-menu>
+            </div>
+
+
+        </div>
+        <div class="user-profile-fields">
+            <template for:each={displayedUserFields} for:item="field">
+                <lightning-input key={field.name} class={field.className} name={field.name} label={field.label}
+                    value={field.value} readonly={readonly}></lightning-input>
+            </template>
+
+            <div class="user-profile-form-actions">
+                <div>
+                <lightning-button-icon icon-name={logoutButton.iconName}
+                    variant="error" data-name={logoutButton.name} onclick={handleLogoutUser}></lightning-button-icon>
+                </div>
+                <div>
+                <lightning-button-icon icon-name={editButtonIcon} variant="border" onclick={toggleEditMode}>
+                </lightning-button-icon>
+                <!-- Update -->
+                <lightning-button-icon if:false={showUpdateButton} class="slds-p-left_small" icon-name={saveButton.iconName}
+                    variant="brand" data-name={saveButton.name} onclick={handleSaveUser}></lightning-button-icon>
+                
+                <lightning-button-icon if:true={showUpdateButton} class="slds-p-left_small" icon-name={saveButton.iconName}
+                    variant="brand" data-name={saveButton.name} onclick={handleSaveUser}></lightning-button-icon>
+                </div>
+            </div>
+        </div>
+    </div>
+</template>

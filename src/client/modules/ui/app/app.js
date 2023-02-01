@@ -1,9 +1,8 @@
 /* eslint-disable no-prototype-builtins */
 import { LightningElement, api, track } from 'lwc';
-import { getData, getRecords, createRecord } from 'data/services';
-import { UserQuery, UpdateUserQuery } from './data/sfQuery';
-const ENDPOINT = '/api/v1/accounts';
-const FIELDS = ['Name', 'Type'];
+// import { getData, createRecord } from 'data/services';
+// import { UserQuery, UpdateUserQuery } from './data/user-queries';
+
 
 const NAV_ACTIONS = [
     {
@@ -22,8 +21,9 @@ const NAV_ACTIONS = [
         iconName: 'utility:settings'
     }
 ];
+const IS_DEV = true;
 const SERVER_URL = `https://test-service-skwt.onrender.com`;
-// const DEV_SERVER = `http://localhost:3001`;
+const DEV_SERVER = `http://localhost:3001`;
 export default class App extends LightningElement {
     @api
     get pathName() {
@@ -32,20 +32,144 @@ export default class App extends LightningElement {
     set pathName(value) {
         this._pathName = value;
     }
-    _pathName = '/about';
-    sidebarActions = NAV_ACTIONS;
+    _pathName = NAV_ACTIONS[0].name;
+
 
     _currentUser;
     loading = false;
-    handleMenuItemSelect(event) {
-        const { actionName } = event.detail;
+
+    isMenuOpen = false;
+    /* SF Login Details */
+    userPanelOpen = false;
+    loggedIn = false;
+    accessToken;
+    loginUrl;
+    lightningUrl;
+    orgId;
+    activeUserId = '';
+    loggedInTime;
+
+    handleLinkClick(event) {
+        event.preventDefault();
+        const actionName = event.target.dataset.name;
         this.addToBrowserHistory(actionName);
     }
-    handleSidebarSelect(event) {
-        const actionName = event.detail;
-        console.log('actionName ' + actionName);
-        this.addToBrowserHistory(actionName);
+    
+
+    results = '';
+    @track records = [];
+
+    connectedCallback() {
+
+        console.log('app path ' + this.pathName);
+        this.loggedIn = this.getUserDetailsFromSessionStorage();
     }
+    
+    getUserDetailsFromSessionStorage() {
+
+        this.accessToken = window.sessionStorage.getItem("sf_accessToken");
+        this.loginUrl = window.sessionStorage.getItem("sf_loginUrl");
+        this.lightningUrl = window.sessionStorage.getItem("sf_lexUrl");
+        this.activeUserId = window.sessionStorage.getItem("sf_userId");
+        this.orgId = window.sessionStorage.getItem("orgId");
+        return this.accessToken ? true : false;
+    }
+
+
+
+    renderLightningOut() {
+        const TARGET_SERVER = IS_DEV ? DEV_SERVER : SERVER_URL;
+        console.log('post message to: ' + TARGET_SERVER);
+        // Post Message to main index.js to render lightning out
+        window.postMessage(
+            {
+                appName: 'c:ossWebApp',
+                componentName: 'c:webActions',
+                componentParams: { primaryId: '123' },
+                accessToken: this.accessToken,
+                lightningUrl: this.lightningUrl,
+                loginUrl: this.loginUrl
+            },
+            TARGET_SERVER
+        );
+    }
+
+
+    
+
+    toggleUserPanel() {
+        this.loggedIn = this.getUserDetailsFromSessionStorage();
+        this.userPanelOpen = !this.userPanelOpen;
+    }
+
+
+    // create() {
+    //     const record = { Name: 'My Account #4' };
+
+    //     createRecord(record)
+    //         .then(reponse => {
+    //             if (reponse) {
+    //                 console.log('created record ' + JSON.stringify(reponse));
+    //             }
+    //         })
+    //         .catch(error => {
+    //             console.log(error);
+    //         });
+    // }
+
+
+    
+
+    handleUpdateUser(event) {
+        this._currentUser = event.detail.currentUser;
+        console.log('currentUser ' + JSON.stringify(this.currentUser));
+        this.loggedIn = true;
+    }
+
+    get currentUser() {
+        return this._currentUser ? this._currentUser : '';
+    }
+
+    /* Header panel */
+    get sidebarActions() {
+        const currentPath = this.pathName;
+        return NAV_ACTIONS.map(item => ({
+            ...item,
+            active: `${currentPath}` === `${item.name}`,
+            className:
+            `${currentPath}` === `${item.name}`
+                    ? 'web-menu-item active'
+                    : 'web-menu-item'
+        }));
+    }
+    toggleRightPanel(toggle) {
+        const grid = this.template.querySelector('.web-grid-container');
+        const rightSideWidth = toggle ? '12rem' : '3rem';
+        grid.style.setProperty('--rightbar-width', rightSideWidth); 
+    }
+    handleToggleHamburgerMenu() {
+        this.isMenuOpen = !this.isMenuOpen;
+        const grid = this.template.querySelector('.header-bar');
+        const grid_dir = this.isMenuOpen ? 'column' : 'row' ;
+        const grid_width = this.isMenuOpen ? '100%' : '20%' ;
+        grid.style.setProperty('--topbar-direction', grid_dir); 
+        grid.style.setProperty('--topbar-menu-width', grid_width); 
+    }
+    handleCloseUserPanel() {
+        this.userPanelOpen = false;
+        // this.toggleRightPanel(this.userPanelOpen);
+    }
+    get hamburgerMenuIcon() {
+        return this.isMenuOpen ? 'utility:close' : 'utility:justify_text';
+    }
+    get loginButton() {
+        return {
+            name: 'login',
+            label: this.userPanelOpen ? 'Close > ' : 'UserName <' 
+        };
+    }
+    
+    /* Handle Browser History on Navigation */
     addToBrowserHistory(actionName) {
         if (actionName) {
             this._pathName = actionName;
@@ -56,167 +180,5 @@ export default class App extends LightningElement {
                 `?page=${this.pathName}`
             );
         }
-    }
-
-    results = '';
-    @track records = [];
-
-    connectedCallback() {
-        // this.loadRecords();
-        console.log('app path ' + this.pathName);
-    }
-    renderLightningOut() {
-        console.log('post message to: ' + SERVER_URL);
-        // Post Message to main index.js to render lightning out
-        window.postMessage(
-            {
-                componentName: 'c:webActions',
-                componentParams: { primaryId: '123' },
-                accessToken: this.accessToken,
-                instanceUrl: this.instanceUrl
-            },
-            SERVER_URL
-        );
-    }
-
-    loadRecords() {
-        // fetch data
-        // const soql = `SELECT Id, Name, Type FROM Account LIMIT 100`;
-        // const myRequest = new Request({
-        //     soql: soql
-        // });
-
-        getRecords(ENDPOINT)
-            .then(reponse => {
-                let records = [];
-                reponse.forEach(record => {
-                    let item = { Id: record.Id };
-                    FIELDS.forEach(field => {
-                        if (record.hasOwnProperty(field)) {
-                            item[field] = record[field];
-                        }
-                    });
-                    records.push(item);
-                });
-                this.records = records;
-                this.results = JSON.stringify(records);
-            })
-            .catch(error => {
-                console.log(error);
-            });
-    }
-
-    accessToken;
-    instanceUrl;
-    orgId;
-    activeUserId = '';
-    loggedIn = false;
-    rightSideBarOpen = false;
-    handleLoginUser() {
-        console.log('login');
-        if (this.loggedIn) {
-            this.rightSideBarOpen = !this.rightSideBarOpen;
-            this.toggleRightSidebar(this.rightSideBarOpen);
-        } else {
-            console.log('nologin');
-            this.activeUserId = '';
-            this.loginToOrg();
-        }
-    }
-
-    create() {
-        const record = { Name: 'My Account #4' };
-
-        createRecord(record)
-            .then(reponse => {
-                if (reponse) {
-                    console.log('created record ' + JSON.stringify(reponse));
-                }
-            })
-            .catch(error => {
-                console.log(error);
-            });
-    }
-    toggleRightSidebar(toggle = true) {
-        const container = this.template.querySelector('ui-container');
-        if (container) container.toggleRightPanel(toggle);
-    }
-
-    async loginToOrg() {
-        this.loading = true;
-        const graphQuery = UserQuery();
-        try {
-            const response = await getData(graphQuery);
-            if (response) {
-                const details = response.data.login;
-
-                this.activeUserId = details.userId;
-                this.accessToken = details.accessToken;
-                this.instanceUrl = details.loginUrl;
-                this.orgId = details.organizationId;
-
-                console.log(
-                    'details.loggedInUser : ' +
-                        JSON.stringify(details.loggedInUser)
-                );
-                // Set login detail in session storage
-                window.sessionStorage.setItem(
-                    'sf_accessToken',
-                    details.accessToken
-                );
-                window.sessionStorage.setItem(
-                    'sf_instanceUrl',
-                    details.loginUrl
-                );
-                window.sessionStorage.setItem('sf_userId', details.userId);
-                window.sessionStorage.setItem(
-                    'sf_orgId',
-                    details.organizationId
-                );
-                // Sets Logged In flag
-                this.loggedIn = true;
-                // Get User Details
-                this._currentUser = details.loggedInUser;
-                this.loading = false;
-                this.rightSideBarOpen = true;
-                this.toggleRightSidebar(this.rightSideBarOpen);
-            }
-        } catch (error) {
-            this.loggedIn = false;
-            this.loading = false;
-            //if(typeof error !== 'object')
-            console.error('cannot login ' + error);
-        }
-    }
-    userReadOnly = true;
-    async handleUpdateUser(event) {
-        const fields = event.detail;
-
-        // const record = fields.reduce((rec, field) => {
-        //                     return {...rec, [field.name]: field.value };
-        // }, {});
-        const record = fields.reduce((rec, field) => {
-            return ` ${rec} ${field.name}: "${field.value}",`;
-        }, '');
-        let recordText = `{${record.substring(0, record.length - 1)}}`;
-        console.log(`record => ${recordText}`);
-        const mutQuery = UpdateUserQuery(recordText);
-        try {
-            const response = await getData(mutQuery);
-            if (response) {
-                console.log('success ' + JSON.stringify(response));
-                this._currentUser = response.data.updateUser;
-
-                const userProfileComp = this.template.querySelector(
-                    'c-user-profile'
-                );
-                if (userProfileComp) userProfileComp.toggleEditMode();
-            }
-        } catch (error) {
-            console.log('error update record ' + JSON.stringify(error));
-        }
-    }
-    get currentUser() {
-        return this._currentUser ? this._currentUser : '';
     }
 }
