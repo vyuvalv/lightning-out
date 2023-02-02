@@ -1,4 +1,12 @@
-const { GraphQLID, GraphQLString, GraphQLBoolean, GraphQLList, GraphQLObjectType, GraphQLInputObjectType, GraphQLInt } = require('graphql');
+const {
+    GraphQLID,
+    GraphQLString,
+    GraphQLBoolean,
+    GraphQLList,
+    GraphQLObjectType,
+    GraphQLInputObjectType,
+    GraphQLInt
+} = require('graphql');
 // eslint-disable-next-line no-unused-vars
 const jsforce = require('jsforce');
 
@@ -35,7 +43,7 @@ const ResponseError = new GraphQLObjectType({
     fields: () => ({
         success: { type: GraphQLBoolean },
         cached: { type: GraphQLBoolean },
-        message: { type: GraphQLString },
+        message: { type: GraphQLString }
     })
 });
 const SObjectDescribe = new GraphQLObjectType({
@@ -62,10 +70,10 @@ const ColumnItem = new GraphQLObjectType({
     description: 'Field Column Item',
     fields: () => ({
         fieldNameOrPath: { type: GraphQLString },
-        label:{ type: GraphQLString },
+        label: { type: GraphQLString },
         type: { type: GraphQLString },
         sortDirection: { type: GraphQLString },
-        value:{ type: GraphQLString }
+        value: { type: GraphQLString }
     })
 });
 const ListViewItem = new GraphQLObjectType({
@@ -73,7 +81,7 @@ const ListViewItem = new GraphQLObjectType({
     description: 'ListViews Item',
     fields: () => ({
         id: { type: GraphQLString },
-        developerName:{ type: GraphQLString },
+        developerName: { type: GraphQLString },
         label: { type: GraphQLString },
         columns: { type: new GraphQLList(ColumnItem) },
         records: { type: new GraphQLList(ColumnItem) }
@@ -85,8 +93,8 @@ const SObjectOptions = new GraphQLObjectType({
     description: 'SObject List',
     fields: () => ({
         sobjects: { type: new GraphQLList(SObjectDescribe) },
-        listviews:  { type: new GraphQLList(ListViewItem) },
-        total:{ type: GraphQLInt }
+        listviews: { type: new GraphQLList(ListViewItem) },
+        total: { type: GraphQLInt }
     })
 });
 
@@ -103,21 +111,29 @@ const UserObject = new GraphQLObjectType({
         FullPhotoUrl: { type: GraphQLString },
         LanguageLocaleKey: { type: GraphQLString },
         LastLoginDate: { type: GraphQLString },
+        ProfileId: { type: GraphQLString }
     })
 });
 const UserUpdateRequest = new GraphQLInputObjectType({
     name: 'UserObjectUpdate',
     description: 'User Update Details',
-    fields: () =>  ({
+    fields: () => ({
         Id: { type: GraphQLID },
         FirstName: { type: GraphQLString },
         LastName: { type: GraphQLString },
         Email: { type: GraphQLString },
         FullPhotoUrl: { type: GraphQLString },
-        LanguageLocaleKey: { type: GraphQLString },
+        LanguageLocaleKey: { type: GraphQLString }
     })
 });
 
-
 // eslint-disable-next-line no-undef
-module.exports = { LoginRequest, LogoutResponse, UserUpdateRequest, UserObject, ResponseError , SObjectOptions, ListViewItem };
+module.exports = {
+    LoginRequest,
+    LogoutResponse,
+    UserUpdateRequest,
+    UserObject,
+    ResponseError,
+    SObjectOptions,
+    ListViewItem
+};

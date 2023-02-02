@@ -18,9 +18,9 @@ export const AuthLoginQuery = (username, password, securityToken, loginUrl) => {
             }
           }`
     };
-}
-export const CredentialsQuery =  {
-        query: `{
+};
+export const CredentialsQuery = {
+    query: `{
             getEnvParameters{
              loginUrl
              username
@@ -28,7 +28,7 @@ export const CredentialsQuery =  {
              securityToken
            }
         }`
-    };
+};
 
 export const AuthQuery = () => {
     return {
@@ -39,23 +39,21 @@ export const AuthQuery = () => {
             }
           }`
     };
-}
-export const UserDataQuery = (userId='') => {
+};
+export const UserDataQuery = (userId = '', refresh = false) => {
     return {
         query: `{
-            getUser (userId:"${userId}"){
+            getUser (userId:"${userId}" refresh:${refresh}){
                 Id Name FirstName LastName  Email FullPhotoUrl LanguageLocaleKey LastLoginDate
             }
           }`
     };
-}
+};
 
 export const UpdateUserQuery = (record = `{ FirstName: "Y"}`) => {
-    
     return {
         query: `mutation {
                 updateUser( fields :${record}){  Id Name FirstName LastName Email FullPhotoUrl LanguageLocaleKey LastLoginDate }
             }`
     };
-}
-
+};

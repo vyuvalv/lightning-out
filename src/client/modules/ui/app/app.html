@@ -2,7 +2,11 @@
     <!--Header -->
     <div class="header-bar">
         <div class="web-pages-links">
-            <template if:true={sidebarActions.length} for:each={sidebarActions} for:item="link">
+            <template
+                if:true={sidebarActions.length}
+                for:each={sidebarActions}
+                for:item="link"
+            >
                 <a
                     class={link.className}
                     key={link.name}
@@ -14,11 +18,16 @@
         </div>
         <div class="web-shrinked-menu">
             <!-- User Login -->
-            <div class="user-login-button" data-name={loginButton.name} onclick={toggleUserPanel}>
-                {loginButton.label}
+            <div
+                class="user-login-button"
+                data-name={loginButton.name}
+                onclick={toggleUserPanel}
+            >
+                {loginButton.label} {currentUser.Name}
             </div>
             <!-- Hamburger Menu -->
-            <lightning-button-icon class="hamburger-menu-button"
+            <lightning-button-icon
+                class="hamburger-menu-button"
                 icon-name={hamburgerMenuIcon}
                 variant="bare"
                 size="large"
@@ -27,26 +36,26 @@
         </div>
     </div>
     <div class="user-login-panel slds-nubbin_top-right" if:true={userPanelOpen}>
-            <!-- Close User Panel -->
-            <lightning-button-icon class="close-panel-button"
-                icon-name="utility:close"
-                variant="bare"
-                size="large"
-                onclick={handleCloseUserPanel}
-            ></lightning-button-icon>
-            <!-- User Panel -->
-            <div class="user-panel-content">
-                <c-user-profile
-                    logged-in={loggedIn}
-                    active-user-id={activeUserId}
-                    onuserupdate={handleUpdateUser}
-                ></c-user-profile>
-            </div>
+        <!-- Close User Panel -->
+        <lightning-button-icon
+            class="close-panel-button"
+            icon-name="utility:close"
+            variant="bare"
+            size="large"
+            onclick={handleCloseUserPanel}
+        ></lightning-button-icon>
+        <!-- User Panel -->
+        <div class="user-panel-content">
+            <c-user-profile
+                logged-in={loggedIn}
+                active-user-id={activeUserId}
+                onuserupdate={handleUpdateUser}
+            ></c-user-profile>
+        </div>
     </div>
     <div if:true={isMenuOpen} class="web-backdrop"></div>
     <!-- Main Preview -->
     <div class="web-grid-container">
-        
         <div class="web-content">
             <!-- Loading -->
             <lightning-spinner
@@ -61,16 +70,15 @@
                 variant="border-filled"
                 onclick={renderLightningOut}
             ></lightning-button>
-            
+
             <!-- Content -->
             <ui-content-body
-            if:true={pathName}
-            path-name={pathName}
-            onpublish={toggleUserPanel}
-        ></ui-content-body>
+                if:true={pathName}
+                path-name={pathName}
+                onpublish={toggleUserPanel}
+            ></ui-content-body>
         </div>
     </div>
 
     <!-- END -->
-
 </template>

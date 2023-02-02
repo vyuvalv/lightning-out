@@ -3,7 +3,6 @@ import { LightningElement, api, track } from 'lwc';
 // import { getData, createRecord } from 'data/services';
 // import { UserQuery, UpdateUserQuery } from './data/user-queries';
 
-
 const NAV_ACTIONS = [
     {
         name: '/home',
@@ -34,7 +33,6 @@ export default class App extends LightningElement {
     }
     _pathName = NAV_ACTIONS[0].name;
 
-
     _currentUser;
     loading = false;
 
@@ -54,28 +52,23 @@ export default class App extends LightningElement {
         const actionName = event.target.dataset.name;
         this.addToBrowserHistory(actionName);
     }
-    
 
     results = '';
     @track records = [];
 
     connectedCallback() {
-
         console.log('app path ' + this.pathName);
         this.loggedIn = this.getUserDetailsFromSessionStorage();
     }
-    
-    getUserDetailsFromSessionStorage() {
 
-        this.accessToken = window.sessionStorage.getItem("sf_accessToken");
-        this.loginUrl = window.sessionStorage.getItem("sf_loginUrl");
-        this.lightningUrl = window.sessionStorage.getItem("sf_lexUrl");
-        this.activeUserId = window.sessionStorage.getItem("sf_userId");
-        this.orgId = window.sessionStorage.getItem("orgId");
+    getUserDetailsFromSessionStorage() {
+        this.accessToken = window.sessionStorage.getItem('sf_accessToken');
+        this.loginUrl = window.sessionStorage.getItem('sf_loginUrl');
+        this.lightningUrl = window.sessionStorage.getItem('sf_lexUrl');
+        this.activeUserId = window.sessionStorage.getItem('sf_userId');
+        this.orgId = window.sessionStorage.getItem('orgId');
         return this.accessToken ? true : false;
     }
-
-
 
     renderLightningOut() {
         const TARGET_SERVER = IS_DEV ? DEV_SERVER : SERVER_URL;
@@ -94,14 +87,10 @@ export default class App extends LightningElement {
         );
     }
 
-
-    
-
     toggleUserPanel() {
         this.loggedIn = this.getUserDetailsFromSessionStorage();
         this.userPanelOpen = !this.userPanelOpen;
     }
-
 
     // create() {
     //     const record = { Name: 'My Account #4' };
@@ -116,9 +105,6 @@ export default class App extends LightningElement {
     //             console.log(error);
     //         });
     // }
-
-
-    
 
     handleUpdateUser(event) {
         this._currentUser = event.detail.currentUser;
@@ -137,7 +123,7 @@ export default class App extends LightningElement {
             ...item,
             active: `${currentPath}` === `${item.name}`,
             className:
-            `${currentPath}` === `${item.name}`
+                `${currentPath}` === `${item.name}`
                     ? 'web-menu-item active'
                     : 'web-menu-item'
         }));
@@ -145,15 +131,15 @@ export default class App extends LightningElement {
     toggleRightPanel(toggle) {
         const grid = this.template.querySelector('.web-grid-container');
         const rightSideWidth = toggle ? '12rem' : '3rem';
-        grid.style.setProperty('--rightbar-width', rightSideWidth); 
+        grid.style.setProperty('--rightbar-width', rightSideWidth);
     }
     handleToggleHamburgerMenu() {
         this.isMenuOpen = !this.isMenuOpen;
         const grid = this.template.querySelector('.header-bar');
-        const grid_dir = this.isMenuOpen ? 'column' : 'row' ;
-        const grid_width = this.isMenuOpen ? '100%' : '20%' ;
-        grid.style.setProperty('--topbar-direction', grid_dir); 
-        grid.style.setProperty('--topbar-menu-width', grid_width); 
+        const grid_dir = this.isMenuOpen ? 'column' : 'row';
+        const grid_width = this.isMenuOpen ? '100%' : '20%';
+        grid.style.setProperty('--topbar-direction', grid_dir);
+        grid.style.setProperty('--topbar-menu-width', grid_width);
     }
     handleCloseUserPanel() {
         this.userPanelOpen = false;
@@ -165,10 +151,14 @@ export default class App extends LightningElement {
     get loginButton() {
         return {
             name: 'login',
-            label: this.userPanelOpen ? 'Close > ' : 'UserName <' 
+            label: this.loggedIn
+                ? 'Connected'
+                : this.userPanelOpen
+                ? 'Close > '
+                : 'Log in'
         };
     }
-    
+
     /* Handle Browser History on Navigation */
     addToBrowserHistory(actionName) {
         if (actionName) {
