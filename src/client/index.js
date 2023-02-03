@@ -6,7 +6,7 @@ import MainApp from 'ui/app';
 
 const IS_DEV = true;
 const DEV_SERVER = `http://localhost:3001`;
-const SERVER_URL = `https://test-service-skwt.onrender.com`; 
+const SERVER_URL = `https://test-service-skwt.onrender.com`;
 const TARGET_SERVER = IS_DEV ? DEV_SERVER : SERVER_URL;
 // router
 // const startingLocation = window.location.pathname;
@@ -36,7 +36,6 @@ window.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-
 window.addEventListener(
     'message',
     event => {
@@ -60,7 +59,6 @@ window.addEventListener(
             componentParams = event.data.componentParams;
 
             if (accessToken && lexUrl) {
-
                 if (!scriptPromise) {
                     console.log('script init as no domain ');
                     scriptPromise = addLightningScript(lexUrl);
@@ -78,13 +76,10 @@ window.addEventListener(
                     );
                 });
             } else {
-                console.log(
-                    'need to login first - no access token..'
-                );
+                console.log('need to login first - no access token..');
                 accessToken = window.sessionStorage.getItem('sf_accessToken');
                 lexUrl = window.sessionStorage.getItem('sf_lexUrl');
                 if (accessToken && lexUrl) {
-                
                     renderLexApp(
                         lexAppName,
                         componentName,
@@ -95,7 +90,6 @@ window.addEventListener(
                     );
                 }
             }
-        
         }
     },
     false
@@ -106,6 +100,7 @@ window.onpopstate = function(event) {
     console.log(`page: ${pageName}`);
     // assign the history page name to app
     app.pathName = pageName;
+    console.log(`history page: ${pageName}`);
     // addHistory(pageName);
     // window.history.back();
 };

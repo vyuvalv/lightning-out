@@ -36,6 +36,7 @@ let accessToken;
 let loginUrl = SF_INSTANCE_URL;
 let orgUrl;
 let connection = {};
+
 const ServerCredentials = new GraphQLObjectType({
     name: 'ServerCredentials',
     description: 'Env Variables',
@@ -113,7 +114,7 @@ const RootQuery = new GraphQLObjectType({
                     instanceUrl
                 } = args.credentials ? args.credentials : {};
                 // simple auth connection
-                response = loginToOrg(
+                response = await loginToOrg(
                     instanceUrl,
                     username,
                     password,
@@ -143,7 +144,7 @@ const RootQuery = new GraphQLObjectType({
             },
             async resolve(parentValue, args, context) {
                 const { userId, refresh } = args;
-                if (refresh && activeUser) {
+                if (!refresh && activeUser) {
                     return activeUser;
                 }
                 // Update DB
@@ -296,7 +297,9 @@ const RootQuery = new GraphQLObjectType({
         // Logout from Salesforce
         logout: {
             type: LogoutResponse,
-            args: {},
+            args: {
+                userId: { type: GraphQLString }
+            },
             async resolve(parentValue, args) {
                 let response = {};
 

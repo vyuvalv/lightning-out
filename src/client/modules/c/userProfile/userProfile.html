@@ -3,6 +3,15 @@
     <div
         class="user-profile-container slds-border_bottom slds-m-bottom_x-small"
     >
+        <div if:true={errors} class="user-form-errors">
+            <c-error-panel
+                errors={errors}
+                friendly-message={errorTitle}
+                type="toast"
+                severity={errorType}
+                onclose={handleCloseErrors}
+            ></c-error-panel>
+        </div>
         <!-- Profile Image Header -->
         <div class="user-profile-background">
             <div class="slds-grid slds-p-around_xx-small">
@@ -17,7 +26,7 @@
                 <div class="slds-col_bump-left">
                     <lightning-button-menu
                         variant="border-filled"
-                        onselect={onSelectAction}
+                        onselect={onSelectMenuItem}
                         alternative-text="Show menu"
                         icon-size="x-small"
                         menu-alignment="right"
@@ -57,7 +66,7 @@
                     icon-size="x-small"
                     menu-alignment="right"
                 >
-                    <template for:each={languages} for:item="lang">
+                    <template for:each={languagesOptions} for:item="lang">
                         <lightning-menu-item
                             key={lang.value}
                             value={lang.value}
@@ -94,7 +103,8 @@
                 size="medium"
                 variant="brand"
                 alternative-text="loading"
-            ></lightning-spinner>
+            >
+            </lightning-spinner>
             <!-- User Profile Form -->
             <template
                 if:false={loading}
@@ -142,7 +152,8 @@
                         variant="success"
                         data-name="update"
                         onclick={handleButtonClicked}
-                    ></lightning-button-icon>
+                    >
+                    </lightning-button-icon>
                     <!-- Login -->
                     <lightning-button-icon
                         if:true={loginModeButtons}

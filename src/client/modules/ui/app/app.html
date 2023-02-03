@@ -3,8 +3,8 @@
     <div class="header-bar">
         <div class="web-pages-links">
             <template
-                if:true={sidebarActions.length}
-                for:each={sidebarActions}
+                if:true={siteMenuLinks.length}
+                for:each={siteMenuLinks}
                 for:item="link"
             >
                 <a
@@ -23,7 +23,16 @@
                 data-name={loginButton.name}
                 onclick={toggleUserPanel}
             >
-                {loginButton.label} {currentUser.Name}
+                <lightning-icon
+                    class="user-login-button-icon"
+                    icon-name={loginButton.iconName}
+                    variant={loginButton.variant}
+                    size="small"
+                ></lightning-icon>
+                <div class="slds-p-horizontal_x-small">
+                    <p if:true={currentUser}>{currentUser.Name}</p>
+                    <p>{loginButton.label}</p>
+                </div>
             </div>
             <!-- Hamburger Menu -->
             <lightning-button-icon
@@ -50,6 +59,7 @@
                 logged-in={loggedIn}
                 active-user-id={activeUserId}
                 onuserupdate={handleUpdateUser}
+                onlogout={handleLogout}
             ></c-user-profile>
         </div>
     </div>
@@ -73,7 +83,6 @@
 
             <!-- Content -->
             <ui-content-body
-                if:true={pathName}
                 path-name={pathName}
                 onpublish={toggleUserPanel}
             ></ui-content-body>

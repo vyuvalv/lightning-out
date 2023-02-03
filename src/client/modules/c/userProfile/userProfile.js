@@ -8,7 +8,6 @@ import {
 } from 'data/queries';
 import { getData } from 'data/services';
 
-const flags = '/resources/images/flags';
 const MORNING_TIME = 12,
     NOON_TIME = 16;
 
@@ -27,26 +26,27 @@ const FIELDS_LABELS = {
     loginUrl: 'Login Url'
 };
 
+const FLAGS_IMAGES = '/resources/images/flags';
 const LANG_LABELS = {
     'en-GB': {
         label: 'English (GB)',
         key: 'en',
-        image: flags + '/uk.svg'
+        image: FLAGS_IMAGES + '/uk.svg'
     },
     en: {
         label: 'English',
         value: 'en',
-        image: flags + '/united-states.svg'
+        image: FLAGS_IMAGES + '/united-states.svg'
     },
     es: {
         label: 'Spanish',
         value: 'es',
-        image: flags + '/es.svg'
+        image: FLAGS_IMAGES + '/es.svg'
     },
     he: {
         label: 'Hebrew',
         key: 'iw',
-        image: flags + '/il.svg'
+        image: FLAGS_IMAGES + '/il.svg'
     }
 };
 export default class UserProfile extends LightningElement {
@@ -73,16 +73,17 @@ export default class UserProfile extends LightningElement {
     _loggedIn = false;
     @track _currentUser;
 
+    loading = false;
+    errors;
+    errorTitle = 'Error';
+    errorType = 'error';
+
     currentUserLanguageKey = 'en';
     currentUserLanguage = LANG_LABELS[this.currentUserLanguageKey];
     _languageOptions = [];
 
-    readonly = false;
+    _readonly = false;
     serverCredentials = {};
-    accessToken;
-    instanceUrl;
-    lightningUrl;
-    orgId;
 
     connectedCallback() {
         // Set Languages from Browser
@@ -92,6 +93,17 @@ export default class UserProfile extends LightningElement {
             ...LANG_LABELS[lang]
         }));
         this.currentUserLanguage = LANG_LABELS[this.currentUserLanguageKey];
+
+        if (this.loggedIn) {
+            this.handleRefreshUser(false);
+        }
+    }
+    rendered = false;
+    renderedCallback() {
+        if (!this.rendered) {
+            this.setImageBackground();
+            this.rendered = true;
+        }
     }
 
     get greeting() {
@@ -112,45 +124,28 @@ export default class UserProfile extends LightningElement {
             ? `${this.user.Name}`
             : ` Add your credentials to Salesforce org to login `;
     }
-    rendered = false;
-    renderedCallback() {
-        if (!this.rendered) {
-            this.setImageBackground();
-
-            // Login fields
-            if (this.loggedIn) {
-                this.readonly = true;
-                // this._activeUserId = window.sessionStorage.getItem('sf_userId');
-                this.handleRefreshUser(false);
-            }
-
-            this.rendered = true;
-        }
+    get userProfileImage() {
+        return this.user.FullPhotoUrl
+            ? this.user.FullPhotoUrl
+            : 'https://qsyd-perma-bucket.s3-ap-southeast-2.amazonaws.com/file-explorer/images/file200x200.png';
+    }
+    get readonly() {
+        return this._readonly;
+    }
+    handleImgError() {
+        console.warn(
+            'profile image is private in org, in order to display it youll need to set it to public.'
+        );
+        // Set default image
+        this._currentUser = {
+            ...this.user,
+            FullPhotoUrl:
+                'https://qsyd-perma-bucket.s3-ap-southeast-2.amazonaws.com/file-explorer/images/file200x200.png'
+        };
     }
 
-    setImageBackground() {
-        const currentHour = new Date().getHours();
-        const timeInDay =
-            currentHour <= MORNING_TIME
-                ? 'MORNING'
-                : currentHour <= NOON_TIME
-                ? 'NOON'
-                : 'EVENING';
-        const imgBkg = this.template.querySelector('.user-profile-background');
-        switch (timeInDay) {
-            case 'MORNING':
-                imgBkg.classList.add('morning-background');
-                break;
-            case 'NOON':
-                imgBkg.classList.add('noon-background');
-                break;
-            case 'EVENING':
-                imgBkg.classList.add('evening-background');
-                break;
-        }
-    }
-
-    onSelectAction(event) {
+    /* Header Menu Items */
+    onSelectMenuItem(event) {
         const selectedMenuItem = event.detail.value;
         // console.log('selectedMenuItem ' + selectedMenuItem);
         switch (selectedMenuItem) {
@@ -161,13 +156,23 @@ export default class UserProfile extends LightningElement {
         }
     }
 
-    get languages() {
+    get languagesOptions() {
         return this._languageOptions
             .map(lang => ({
                 ...lang,
                 active: lang.value === this.currentUserLanguageKey
             }))
             .sort((a, b) => (a.active < b.active ? 1 : -1));
+    }
+
+    /* Language Picker */
+    handleChangeLanguage(event) {
+        const selectedLanguage = event.detail.value;
+        // Sets user selected language
+        this.currentUserLanguageKey = selectedLanguage;
+        this.currentUserLanguage = this.languagesOptions.find(
+            lang => lang.value === selectedLanguage
+        );
     }
 
     onLanguageHover(event) {
@@ -181,14 +186,7 @@ export default class UserProfile extends LightningElement {
         editButton.classList.toggle('language-edit-button-hide');
     }
 
-    handleChangeLanguage(event) {
-        const selectedLanguage = event.detail.value;
-        console.log('selectedLanguage ' + selectedLanguage);
-        this.currentUserLanguageKey = selectedLanguage;
-        this.currentUserLanguage = this.languages.find(
-            lang => lang.value === selectedLanguage
-        );
-    }
+    /* Form Fields */
     get displayedUserFields() {
         const fields = this.loggedIn
             ? this.readonly
@@ -228,6 +226,7 @@ export default class UserProfile extends LightningElement {
         }
         return value;
     }
+
     calculateTimeFromLastLogin(lastLoginDate) {
         const languageKey = this.currentUserLanguageKey;
         const timeDifference = Date.now() - new Date(lastLoginDate).getTime();
@@ -241,19 +240,13 @@ export default class UserProfile extends LightningElement {
         const formattedDate = new Intl.RelativeTimeFormat(languageKey, {
             style: 'narrow'
         });
-        // const dayParts = formattedDate.formatToParts(-days, "days");
         const dayParts = formattedDate.format(-days, 'days');
         // const dayPartsText = `${dayParts[0].value} ${dayParts[1].value}`;
         // const hoursParts = formattedDate.formatToParts(-hours, "hours");
         // console.log('hoursParts: ' + JSON.stringify(hoursParts));
         // const hoursPartsText = this.formatHoursPartsToString(hoursParts);
         const hoursPartsText = formattedDate.format(-hours, 'hours');
-
         const minutesParts = formattedDate.formatToParts(-minutes, 'minutes');
-
-        // const minutesText = `${formattedDate.format(-minutes, 'minutes')}`;
-
-        //    const minutesText = `${minutesParts[1].value} ${minutesParts[1].unit}`;
         const minutesText = this.formatPartsToString(minutesParts);
         // Array formmater
         const formatter = new Intl.ListFormat(languageKey, {
@@ -265,9 +258,10 @@ export default class UserProfile extends LightningElement {
             days > 0
                 ? [dayParts, hoursPartsText, minutesText]
                 : [hoursPartsText, minutesText];
-        //const finalText = await formatter.format(displayTextParts);
+
         return formatter.format(displayTextParts);
     }
+
     formatPartsToString(parts) {
         return parts.reduce((str, rec, ind) => {
             return `${str}${rec.type === 'integer' ? rec.value : ''}${
@@ -275,10 +269,8 @@ export default class UserProfile extends LightningElement {
             }`;
         }, '');
     }
-    // formatHoursPartsToString(parts) {
-    //     return parts.reduce((str, rec) => { return `${str}${rec.type ==='integer' ? rec.value: ''} ${rec.type ==='integer' ? rec.unit: ''}`},'');
-    // }
 
+    /* Form Actions Handler */
     handleButtonClicked(event) {
         const actionName = event.target.dataset.name;
         console.log('actionName ' + actionName);
@@ -300,21 +292,32 @@ export default class UserProfile extends LightningElement {
                 break;
         }
     }
-    async handleCredentials() {
-        const qlQuery = CredentialsQuery;
-        const response = await getData(qlQuery);
-        if (response.data) {
-            console.log(
-                'details.loggedInUser : ' +
-                    JSON.stringify(response.data.getEnvParameters)
-            );
-            this.serverCredentials = response.data.getEnvParameters;
-        }
+    toggleEditMode() {
+        this._readonly = !this.readonly;
     }
 
-    @api
-    toggleEditMode() {
-        this.readonly = !this.readonly;
+    get loginModeButtons() {
+        return !this.loggedIn;
+    }
+    get editButtonIcon() {
+        return this.readonly ? 'utility:edit' : 'utility:close';
+    }
+
+    async handleCredentials() {
+        const qlQuery = CredentialsQuery;
+        try {
+            const response = await getData(qlQuery);
+            if (response.data) {
+                // console.log(
+                //     'CredentialsQuery : ' +
+                //         JSON.stringify(response.data.getEnvParameters)
+                // );
+                this.serverCredentials = response.data.getEnvParameters;
+            }
+        } catch (error) {
+            console.log('error fetching credential ' + JSON.stringify(error));
+            this.showErrorPanel(error, 'Credentials Error!', 'warning');
+        }
     }
 
     validateFormInputs(actionName) {
@@ -333,9 +336,9 @@ export default class UserProfile extends LightningElement {
                         inputsWithErrors.push(input.name);
                 }
             });
-            console.log('fields : ' + JSON.stringify(inputs));
+            console.log('fields collected : ' + JSON.stringify(inputs));
             console.log(
-                'inputsWithErrors : ' + JSON.stringify(inputsWithErrors)
+                'inputs with errors : ' + JSON.stringify(inputsWithErrors)
             );
             // publish field changes
             if (inputs.length && !inputsWithErrors.length) {
@@ -345,44 +348,14 @@ export default class UserProfile extends LightningElement {
                     this.loginToOrg(inputs);
                 }
             } else {
-                console.log('no update show input error');
+                this.errors = [{ message: JSON.stringify(inputsWithErrors) }];
+                this.errorTitle = 'Please complete all required inputs';
+                console.log('form input error - no update has happend..');
             }
         }
     }
 
-    get userProfileImage() {
-        return this.user.FullPhotoUrl
-            ? this.user.FullPhotoUrl
-            : 'https://qsyd-perma-bucket.s3-ap-southeast-2.amazonaws.com/file-explorer/images/file200x200.png';
-    }
-    handleImgError() {
-        console.warn(
-            'profile image is private in org, in order to display it youll need to set it to public.'
-        );
-        // Set default image
-        this._currentUser = {
-            ...this.user,
-            FullPhotoUrl:
-                'https://qsyd-perma-bucket.s3-ap-southeast-2.amazonaws.com/file-explorer/images/file200x200.png'
-        };
-    }
-
-    handleLogoutUser() {
-        console.log('logout  ' + this.user.Id);
-        this.dispatchEvent(
-            new CustomEvent('logout', {
-                detail: this.user
-            })
-        );
-    }
-
-    get loginModeButtons() {
-        return !this.loggedIn;
-    }
-    get editButtonIcon() {
-        return this.readonly ? 'utility:edit' : 'utility:close';
-    }
-
+    /* Cached or Hard Refresh from Server */
     async handleRefreshUser(refreshServer = false) {
         this.loading = true;
         const qlQuery = UserDataQuery(this.activeUserId, refreshServer);
@@ -393,18 +366,24 @@ export default class UserProfile extends LightningElement {
                 const details = response.data.getUser;
                 this._currentUser = details;
                 this.loading = false;
-                this.readonly = true;
+                this._readonly = true;
                 this.publishUser();
             } else {
                 console.error(
                     'error getting user: ' + JSON.stringify(response.errors)
                 );
+                this.showErrorPanel(
+                    response.errors,
+                    'User is Not Connected !',
+                    'warning'
+                );
                 this._loggedIn = false;
                 this.loading = false;
+                this._readonly = false;
             }
         } catch (error) {
             this.loading = false;
-            //if(typeof error !== 'object')
+            this.showErrorPanel(error, 'Cannot Refresh User', 'error');
             console.error('cannot login ' + error);
         }
     }
@@ -425,7 +404,7 @@ export default class UserProfile extends LightningElement {
         );
         try {
             const response = await getData(graphQuery);
-            if (response.data) {
+            if (response.data.login) {
                 const details = response.data.login;
                 console.log(
                     'logged in successfully : ' + JSON.stringify(details)
@@ -433,18 +412,30 @@ export default class UserProfile extends LightningElement {
 
                 // Store as local and session variables
                 this.setSessionStorageVars(details);
-                // Store User Details locally
-                this._currentUser = details.loggedInUser;
-                this._loggedIn = true;
+
                 this.loading = false;
-                this.readonly = true;
+                this._readonly = true;
+                this._loggedIn = true;
                 // Store User Details locally on parent
                 this.publishUser();
+            } else {
+                this.showErrorPanel(
+                    response.errors,
+                    'Failed to Login..',
+                    'error'
+                );
+                console.error(
+                    'cannot login ' + JSON.stringify(response.errors)
+                );
             }
         } catch (error) {
             this.loading = false;
-            //if(typeof error !== 'object')
             console.error('cannot login ' + error);
+            this.showErrorPanel(
+                error,
+                'Cannot Login with this User..',
+                'error'
+            );
         }
     }
     // Update User Details
@@ -457,14 +448,22 @@ export default class UserProfile extends LightningElement {
         const mutQuery = UpdateUserQuery(recordText);
         try {
             const response = await getData(mutQuery);
-            if (response) {
-                console.log('success ' + JSON.stringify(response));
+            if (response.data.updateUser) {
+                console.log('update success ' + JSON.stringify(response));
                 this._currentUser = response.data.updateUser;
-                this.readonly = true;
+                this._readonly = true;
                 this.loading = false;
                 this.publishUser();
+            } else {
+                this.showErrorPanel(
+                    response.errors,
+                    'Failed to Update..',
+                    'error'
+                );
+                console.error(JSON.stringify(response.errors));
             }
         } catch (error) {
+            this.showErrorPanel(error, 'Cannot Update User', 'error');
             console.log('error update record ' + JSON.stringify(error));
         }
     }
@@ -477,27 +476,96 @@ export default class UserProfile extends LightningElement {
         );
     }
 
+    async handleLogoutUser() {
+        console.log('logout  ' + this.activeUserId);
+        const logoutQuery = {
+            query: `{ logout (userId:"${this.activeUserId}"){ success } }`
+        };
+        try {
+            const response = await getData(logoutQuery);
+            if (response.data.logout) {
+                const success_logout = response.data.logout.success;
+                console.log(
+                    this.activeUserId + ' - logged out ' + success_logout
+                );
+
+                this._loggedIn = false;
+                this._currentUser = null;
+                this._activeUserId = '';
+                this._readonly = false;
+
+                window.sessionStorage.clear();
+                this.showErrorPanel(
+                    [{ message: 'Clear Session storage' }],
+                    'Logged out !',
+                    'info'
+                );
+
+                this.dispatchEvent(
+                    new CustomEvent('logout', {
+                        detail: success_logout
+                    })
+                );
+
+                // Set timeout to toast
+                window.setTimeout(() => {
+                    this.errors = null;
+                }, 3000);
+            }
+        } catch (error) {
+            console.error('cannot Logout ' + error);
+            this.showErrorPanel(error, 'Cannot Logout', 'error');
+        }
+    }
+    /* Set Cache Storage Store */
     setSessionStorageVars(details) {
         // Store as local variables
-        this.accessToken = details.accessToken;
-        this.lightningUrl = details.lightningUrl;
         this._activeUserId = details.userId;
-        this.orgId = details.organizationId;
-        this.instanceUrl = details.loginUrl;
+        // Store User Details locally
+        this._currentUser = details.loggedInUser;
         // Set login detail in session storage
-        window.sessionStorage.setItem('sf_accessToken', this.accessToken);
-        window.sessionStorage.setItem('sf_loginUrl', this.instanceUrl);
-        window.sessionStorage.setItem('sf_lexUrl', this.lightningUrl);
+        window.sessionStorage.setItem('sf_accessToken', details.accessToken);
+        window.sessionStorage.setItem('sf_loginUrl', details.loginUrl);
+        window.sessionStorage.setItem('sf_lexUrl', details.lightningUrl);
         window.sessionStorage.setItem('sf_userId', this._activeUserId);
-        window.sessionStorage.setItem('sf_orgId', this.orgId);
+        window.sessionStorage.setItem('sf_orgId', details.organizationId);
+        // Sensitive
+        window.sessionStorage.setItem(
+            'sf_user',
+            JSON.stringify(details.loggedInUser)
+        );
+        window.sessionStorage.setItem('sf_login_timestamp', new Date());
     }
-    // getUserDetailsFromSessionStorage() {
 
-    //     this.accessToken = window.sessionStorage.getItem("sf_accessToken");
-    //     this.loginUrl = window.sessionStorage.getItem("sf_loginUrl");
-    //     this.lightningUrl = window.sessionStorage.getItem("sf_lexUrl");
-    //     this._activeUserId = window.sessionStorage.getItem("sf_userId");
-    //     this.orgId = window.sessionStorage.getItem("orgId");
-    //     return this.accessToken ? true : false;
-    // }
+    handleCloseErrors() {
+        this.errors = false;
+    }
+
+    setImageBackground() {
+        const currentHour = new Date().getHours();
+        const timeInDay =
+            currentHour <= MORNING_TIME
+                ? 'MORNING'
+                : currentHour <= NOON_TIME
+                ? 'NOON'
+                : 'EVENING';
+        const imgBkg = this.template.querySelector('.user-profile-background');
+        switch (timeInDay) {
+            case 'MORNING':
+                imgBkg.classList.add('morning-background');
+                break;
+            case 'NOON':
+                imgBkg.classList.add('noon-background');
+                break;
+            case 'EVENING':
+                imgBkg.classList.add('evening-background');
+                break;
+        }
+    }
+
+    showErrorPanel(messages, title = 'error', severity = 'error') {
+        this.errors = messages;
+        this.errorTitle = title;
+        this.errorType = severity;
+    }
 }
