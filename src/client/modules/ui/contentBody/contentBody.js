@@ -6,6 +6,7 @@ import calendarApp from './templates/calendarApp.html';
 
 export default class ContentBody extends LightningElement {
     @api pathName;
+    @api hide;
     // get pathName() {
     //     return this._pathName;
     // }
@@ -21,7 +22,9 @@ export default class ContentBody extends LightningElement {
         else if (this.pathName === '/calendar') return calendarApp;
         return home;
     }
-
+    get hidden() {
+        return this.hide;
+    }
     publish(event) {
         this.dispatchEvent(
             new CustomEvent('publish', {

@@ -6,6 +6,7 @@
     --container-layer-0: 0;
     --container-layer-1: 100;
     --container-layer-2: 1000;
+    --sds-c-toast-sizing-min-width: 600px;
 }
 
 /* Header Panel bar */
@@ -131,7 +132,7 @@
     grid-template-areas: 'maincontent sidebar';
     width: 100%;
     height: 100%;
-    min-height: var(--container-height);
+    /* min-height: var(--container-height); */
     background-color: #2b46e281;
     border: 1px solid black;
     position: relative;
@@ -151,7 +152,11 @@
     .header-bar {
         --topbar-direction: column;
         --topbar-menu-width: 100%;
-        --topbar-height: 50%;
+        /* --topbar-height: 50%; */
+        grid-template-rows: 4rem auto;
+        grid-template-areas:
+            'sidemenu'
+            'links';
     }
 }
 @media (min-width: 600px) {
