@@ -1,0 +1,21 @@
+@media (max-width: 600px) {
+    /* smartphones, portrait iPhone, portrait 480x320 phones (Android) */
+    .header-bar {
+        --topbar-direction: column;
+        --topbar-menu-width: 100%;
+        /* --topbar-height: 50%; */
+        grid-template-rows: 4rem auto;
+        grid-template-areas:
+            'sidemenu'
+            'links';
+    }
+    .slds-notify_container {
+        --sds-c-toast-sizing-min-width: 0;
+    }
+}
+@media (min-width: 600px) {
+    /* portrait tablets, portrait iPad, e-readers (Nook/Kindle), landscape 800x480 phones (Android) */
+}
+@media (min-width: 1025px) {
+    /* big landscape tablets, laptops, and desktops */
+}

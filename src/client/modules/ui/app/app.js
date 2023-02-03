@@ -33,10 +33,18 @@ export default class App extends LightningElement {
     set pathName(value) {
         this._pathName = `${value}`;
     }
+    @api
+    get lwcOutIsRendered() {
+        return this._lwcOutIsRendered;
+    }
+    set lwcOutIsRendered(value) {
+        this._lwcOutIsRendered = value;
+    }
     _pathName = NAV_ACTIONS[0].name;
 
     loading = false;
     isMenuOpen = false;
+    _lwcOutIsRendered = false;
     /* SF Login Details */
     userPanelOpen = false;
     loggedIn = false;
@@ -120,12 +128,13 @@ export default class App extends LightningElement {
 
     renderLightningOut() {
         console.log('post message to: ' + TARGET_SERVER);
+        this._lwcOutIsRendered = true;
         // Post Message to main index.js to render lightning out
         window.postMessage(
             {
                 appName: 'c:ossWebApp',
                 componentName: 'c:webActions',
-                componentParams: { primaryId: '123' },
+                componentParams: { primaryId: this.pathName },
                 accessToken: this.accessToken,
                 lightningUrl: this.lightningUrl,
                 loginUrl: this.loginUrl

@@ -17,6 +17,14 @@
             </template>
         </div>
         <div class="web-shrinked-menu">
+            <!-- Lightning Out Button -->
+            <lightning-button
+                label="lex"
+                icon-name="utility:refresh"
+                variant="border-filled"
+                onclick={renderLightningOut}
+            ></lightning-button>
+
             <!-- User Login -->
             <div
                 class="user-login-button"
@@ -34,6 +42,7 @@
                     <p>{loginButton.label}</p>
                 </div>
             </div>
+
             <!-- Hamburger Menu -->
             <lightning-button-icon
                 class="hamburger-menu-button"
@@ -73,16 +82,10 @@
                 variant="brand"
                 alternative-text="loading.."
             ></lightning-spinner>
-            <!-- Lightning Out Button -->
-            <lightning-button
-                label="lex"
-                icon-name="utility:refresh"
-                variant="border-filled"
-                onclick={renderLightningOut}
-            ></lightning-button>
 
             <!-- Content -->
             <ui-content-body
+                hide={lwcOutIsRendered}
                 path-name={pathName}
                 onpublish={toggleUserPanel}
             ></ui-content-body>
