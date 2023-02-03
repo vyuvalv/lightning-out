@@ -1,50 +1,93 @@
 <template>
-    <lightning-button
-        label="lex"
-        icon-name="utility:refresh"
-        variant="border-filled"
-        onclick={renderLightningOut}
-    ></lightning-button>
-    <lightning-spinner
-        if:true={loading}
-        variant="brand"
-        alternative-text="loading.."
-    ></lightning-spinner>
-    <!-- Container is used to control the theme of the site -->
-    <ui-container
-        links={sidebarActions}
-        onnavigate={handleMenuItemSelect}
-        ontoggle={handleLoginUser}
-    >
-        <!-- Left Sidebar -->
-        <div slot="sidebar">
-            <ui-sidebar
-                actions={sidebarActions}
-                path-name={pathName}
-                onselect={handleSidebarSelect}
-            ></ui-sidebar>
+    <!--Header -->
+    <div class="header-bar">
+        <div class="web-pages-links">
+            <template
+                if:true={siteMenuLinks.length}
+                for:each={siteMenuLinks}
+                for:item="link"
+            >
+                <a
+                    class={link.className}
+                    key={link.name}
+                    data-name={link.name}
+                    onclick={handleLinkClick}
+                    >{link.label}</a
+                >
+            </template>
         </div>
-        <!-- Main content -->
-        <div slot="content">
-            <ui-content-body
-                if:true={pathName}
-                path-name={pathName}
-                onpublish={handleLoginUser}
-            ></ui-content-body>
-        </div>
-        <!-- Right Sidebar -->
-        <div slot="actions" if:true={rightSideBarOpen}>
-            <c-user-profile
-                if:true={activeUserId}
-                user={currentUser}
-                onsave={handleUpdateUser}
-            ></c-user-profile>
-
+        <div class="web-shrinked-menu">
+            <!-- User Login -->
+            <div
+                class="user-login-button"
+                data-name={loginButton.name}
+                onclick={toggleUserPanel}
+            >
+                <lightning-icon
+                    class="user-login-button-icon"
+                    icon-name={loginButton.iconName}
+                    variant={loginButton.variant}
+                    size="small"
+                ></lightning-icon>
+                <div class="slds-p-horizontal_x-small">
+                    <p if:true={currentUser}>{currentUser.Name}</p>
+                    <p>{loginButton.label}</p>
+                </div>
+            </div>
+            <!-- Hamburger Menu -->
             <lightning-button-icon
-                icon-name="utility:add"
-                variant="border-filled"
-                onclick={create}
+                class="hamburger-menu-button"
+                icon-name={hamburgerMenuIcon}
+                variant="bare"
+                size="large"
+                onclick={handleToggleHamburgerMenu}
             ></lightning-button-icon>
         </div>
-    </ui-container>
+    </div>
+    <div class="user-login-panel slds-nubbin_top-right" if:true={userPanelOpen}>
+        <!-- Close User Panel -->
+        <lightning-button-icon
+            class="close-panel-button"
+            icon-name="utility:close"
+            variant="bare"
+            size="large"
+            onclick={handleCloseUserPanel}
+        ></lightning-button-icon>
+        <!-- User Panel -->
+        <div class="user-panel-content">
+            <c-user-profile
+                logged-in={loggedIn}
+                active-user-id={activeUserId}
+                onuserupdate={handleUpdateUser}
+                onlogout={handleLogout}
+            ></c-user-profile>
+        </div>
+    </div>
+    <div if:true={isMenuOpen} class="web-backdrop"></div>
+    <!-- Main Preview -->
+    <div class="web-grid-container">
+        <div class="web-content">
+            <!-- Loading -->
+            <lightning-spinner
+                if:true={loading}
+                variant="brand"
+                alternative-text="loading.."
+            ></lightning-spinner>
+            <!-- Lightning Out Button -->
+            <lightning-button
+                label="lex"
+                icon-name="utility:refresh"
+                variant="border-filled"
+                onclick={renderLightningOut}
+            ></lightning-button>
+
+            <!-- Content -->
+            <ui-content-body
+                path-name={pathName}
+                onpublish={toggleUserPanel}
+            ></ui-content-body>
+        </div>
+    </div>
+
+    <!-- END -->
 </template>

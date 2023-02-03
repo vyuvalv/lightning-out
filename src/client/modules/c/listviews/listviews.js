@@ -10,6 +10,9 @@ export default class ListViews extends LightningElement {
     selectedlistViewId;
     selectedObjectName;
 
+    @track _columns; 
+    @track _records;
+
     connectedCallback() {
         this.getAllObjects();
     }
@@ -57,7 +60,8 @@ export default class ListViews extends LightningElement {
             if (response) {
                 console.log('response ListViewsQuery :', response);
                 this._listviews = response.data.getListViews.listviews;
-            
+                this._columns = response.data.getListViews.listviews.columns;
+                this._records = response.data.getListViews.listviews.records;
                 this.loading = false;
             }
         }
@@ -79,6 +83,19 @@ export default class ListViews extends LightningElement {
         catch (error) {
             console.log(`error ${error.message}`);
         }
+    }
+
+    get columns() {
+        return this._columns.map(item => ({
+            label: item.label,
+            fieldName: item.fieldNameOrPath,
+            type: 'text'
+        }));
+    }
+    get records() {
+        return this._records.map(item => ({
+            [item.fieldNameOrPath]:item.value
+        }));
     }
 
 }

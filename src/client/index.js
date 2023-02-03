@@ -4,8 +4,10 @@ import '@lwc/synthetic-shadow';
 import { createElement } from 'lwc';
 import MainApp from 'ui/app';
 
+const IS_DEV = false;
 const DEV_SERVER = `http://localhost:3001`;
-const SERVER_URL = `https://test-service-skwt.onrender.com`; //
+const SERVER_URL = `https://test-service-skwt.onrender.com`;
+const TARGET_SERVER = IS_DEV ? DEV_SERVER : SERVER_URL;
 // router
 // const startingLocation = window.location.pathname;
 
@@ -13,7 +15,7 @@ const app = createElement('main-app', { is: MainApp });
 const element = document.querySelector('#main');
 // SF Credentials
 let accessToken = '',
-    instanceUrl = '';
+    lexUrl = '';
 let scriptPromise;
 
 window.addEventListener('DOMContentLoaded', () => {
@@ -27,51 +29,45 @@ window.addEventListener('DOMContentLoaded', () => {
 
     // Try to set the lightning out script on load if anything exists in local storage
     accessToken = window.sessionStorage.getItem('sf_accessToken');
-    instanceUrl = window.sessionStorage.getItem('sf_instanceUrl');
-    if (!scriptPromise && instanceUrl) {
+    lexUrl = window.sessionStorage.getItem('sf_lexUrl');
+    if (!scriptPromise && lexUrl) {
         console.log('script init from session ');
-        const lexUrl = instanceUrl.replace(
-            'my.salesforce.com',
-            'lightning.force.com/'
-        );
         scriptPromise = addLightningScript(lexUrl);
     }
 });
 
-
 window.addEventListener(
     'message',
     event => {
-        console.log('event.origin2: ' + event.origin);
+        console.log('message origin: ' + event.origin);
         // Block any event not coming form domain
-        if (event.origin !== SERVER_URL && event.origin !== DEV_SERVER) return;
+        if (event.origin !== TARGET_SERVER) return;
 
-        console.log('event data1: ' + JSON.stringify(event.data));
+        console.log('errors from listeners : ' + JSON.stringify(event.data));
         let componentName = 'lightning:button';
         // const componentName = "c:logger";
         let componentParams = { label: 'helloworld' };
-        const divId = 'lex';
-    
+        const divId = 'lexComponent';
+        let lexAppName = '';
+
         if (!event.data.type) {
             // not on init event
             accessToken = event.data.accessToken;
-            instanceUrl = event.data.instanceUrl;
+            lexUrl = event.data.lightningUrl;
+            lexAppName = event.data.appName;
             componentName = event.data.componentName;
             componentParams = event.data.componentParams;
 
-            if (accessToken && instanceUrl) {
-                const lexUrl = instanceUrl.replace(
-                    'my.salesforce.com',
-                    'lightning.force.com/'
-                );
+            if (accessToken && lexUrl) {
                 if (!scriptPromise) {
                     console.log('script init as no domain ');
                     scriptPromise = addLightningScript(lexUrl);
                 }
-
+                // Render Lightning Components using lightning Out
                 scriptPromise.then(() => {
                     console.log('script run ', componentParams);
                     renderLexApp(
+                        lexAppName,
                         componentName,
                         componentParams,
                         divId,
@@ -80,18 +76,12 @@ window.addEventListener(
                     );
                 });
             } else {
-                console.log(
-                    'not set in lwc yet.. got creds from sesstion storage'
-                );
+                console.log('need to login first - no access token..');
                 accessToken = window.sessionStorage.getItem('sf_accessToken');
-                instanceUrl = window.sessionStorage.getItem('sf_instanceUrl');
-                if (accessToken && instanceUrl) {
-                    const lexUrl = instanceUrl.replace(
-                        'my.salesforce.com',
-                        'lightning.force.com/'
-                    );
-                
+                lexUrl = window.sessionStorage.getItem('sf_lexUrl');
+                if (accessToken && lexUrl) {
                     renderLexApp(
+                        lexAppName,
                         componentName,
                         componentParams,
                         divId,
@@ -100,7 +90,6 @@ window.addEventListener(
                     );
                 }
             }
-        
         }
     },
     false
@@ -111,6 +100,7 @@ window.onpopstate = function(event) {
     console.log(`page: ${pageName}`);
     // assign the history page name to app
     app.pathName = pageName;
+    console.log(`history page: ${pageName}`);
     // addHistory(pageName);
     // window.history.back();
 };
@@ -119,7 +109,7 @@ window.onpopstate = function(event) {
 //     window.history.pushState({ page: pageName }, pageName, `?page=${pageName}`);
 // }
 
-function addLightningScript(lexUrl) {
+function addLightningScript(scriptUrl) {
     // Set Promise to fetch script from org
     return new Promise((resolve, reject) => {
         const scriptTag = document.createElement('script');
@@ -128,11 +118,12 @@ function addLightningScript(lexUrl) {
         scriptTag.onerror = reject;
         scriptTag.async = true;
         scriptTag.crossorigin = 'anonymous';
-        scriptTag.src = `${lexUrl}lightning/lightning.out.js`;
+        scriptTag.src = `${scriptUrl}lightning/lightning.out.js`;
     });
 }
 // Lightning Out Components
 function renderLexApp(
+    lexAppName = 'c:ossWebApp',
     componentName,
     componentParams,
     divId,
@@ -141,7 +132,7 @@ function renderLexApp(
 ) {
     const parentDiv = document.getElementById(divId);
     const errorDiv = document.getElementById('auraErrorMessage');
-    const renderedDivName = 'lexComponent';
+    const renderedDivName = 'lexComponentChild';
     // Remove any child if exists
     if (parentDiv.children.length) {
         for (let child of parentDiv.children) {
@@ -155,7 +146,7 @@ function renderLexApp(
     parentDiv.appendChild(childDiv);
 
     window.$Lightning.use(
-        'c:ossWebApp',
+        lexAppName,
         () => {
             window.$Lightning.createComponent(
                 componentName,

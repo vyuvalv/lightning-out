@@ -1,0 +1,162 @@
+:host {
+    --topbar-height: 4rem;
+    --topbar-menu-width: 20%;
+    --topbar-direction: row;
+    --container-height: 600px;
+    --container-layer-0: 0;
+    --container-layer-1: 100;
+    --container-layer-2: 1000;
+}
+
+/* Header Panel bar */
+.header-bar {
+    width: 100%;
+    height: var(--topbar-height);
+    grid-area: header;
+    overflow: hidden;
+    background-color: #333;
+    position: fixed;
+    z-index: var(--container-layer-2);
+    box-shadow: 2px 2px 5px rgba(43, 70, 226, 0.507);
+    display: grid;
+    grid-template-columns: auto max-content;
+    grid-template-areas: 'links sidemenu';
+    margin-bottom: 0.2rem;
+    /* Override standard slds styling for button icon */
+    --sds-c-button-text-color-active: white;
+    --sds-c-button-text-color-hover: white;
+    --sds-c-button-shadow: transparent;
+    --sds-c-button-shadow-focus: transparent;
+    --sds-c-button-sizing-border: 0;
+}
+.header-bar-mobile {
+    grid-template-rows: 4rem auto;
+    grid-template-areas:
+        'sidemenu'
+        'links';
+}
+/* Header Parts */
+.web-pages-links {
+    grid-area: links;
+    display: flex;
+    flex-direction: var(--topbar-direction);
+    align-items: center;
+}
+.web-shrinked-menu {
+    grid-area: sidemenu;
+    position: relative;
+    right: 0;
+    top: 0;
+    margin: 0.5rem 0.5rem;
+    z-index: var(--container-layer-2);
+    display: flex;
+    color: white;
+    justify-content: flex-end;
+}
+.web-menu-item {
+    color: white;
+    padding: 14px 16px;
+    text-decoration: none;
+    font-size: 17px;
+    display: flex;
+    width: var(--topbar-menu-width);
+    height: 100%;
+    justify-content: center;
+}
+.web-menu-item.active {
+    border-bottom: 3px solid white;
+    background-color: #41415478;
+    font-weight: bold;
+}
+.user-login-button {
+    display: flex;
+    min-width: 8rem;
+    background-color: #41415478;
+    padding: 0.3rem 0.5rem;
+    margin: 0 0.5rem;
+    min-height: 2rem;
+    max-height: 4rem;
+    font-weight: bold;
+    border: 1px solid white;
+    border-radius: 0.2rem;
+    text-align: center;
+    align-items: center;
+    justify-content: space-between;
+}
+.user-login-button:hover {
+    opacity: 0.8;
+    cursor: pointer;
+}
+.web-backdrop {
+    display: block;
+    position: absolute;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #a9a9a9;
+    z-index: var(--container-layer-1);
+    opacity: 0.7;
+}
+/* User Panel */
+.user-login-panel {
+    min-height: 10rem;
+    width: 90%;
+    margin: auto 5%;
+    background-color: white;
+    position: absolute;
+    top: var(--topbar-height);
+    z-index: var(--container-layer-2);
+    box-shadow: 5px 5px 5px grey;
+    border: 1px solid black;
+    border-radius: 0.3rem;
+    display: flex;
+    background-color: #f1f1f1f5;
+}
+.user-login-panel > .close-panel-button {
+    padding: 0.5rem;
+    position: relative;
+    align-self: end;
+}
+.user-login-panel > .user-panel-content {
+    padding: 1rem;
+    align-self: center;
+    flex: 1;
+    padding: 1rem;
+    transition: height 600ms;
+}
+/* Preview Panel */
+.web-grid-container {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-template-areas: 'maincontent sidebar';
+    width: 100%;
+    height: 100%;
+    min-height: var(--container-height);
+    background-color: #2b46e281;
+    border: 1px solid black;
+    position: relative;
+    z-index: var(--container-layer-0);
+    /* top: var(--topbar-height); */
+    margin-top: var(--topbar-height);
+}
+/* Content */
+.web-content {
+    grid-area: maincontent;
+    width: 100%;
+    height: 100%;
+}
+
+@media (max-width: 600px) {
+    /* smartphones, portrait iPhone, portrait 480x320 phones (Android) */
+    .header-bar {
+        --topbar-direction: column;
+        --topbar-menu-width: 100%;
+        --topbar-height: 50%;
+    }
+}
+@media (min-width: 600px) {
+    /* portrait tablets, portrait iPad, e-readers (Nook/Kindle), landscape 800x480 phones (Android) */
+}
+@media (min-width: 1025px) {
+    /* big landscape tablets, laptops, and desktops */
+}

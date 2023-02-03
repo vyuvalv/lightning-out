@@ -14,7 +14,7 @@ const { graphqlHTTP } = require('express-graphql');
 const rootSchema = require('./schema/root');
 
 const dotenv = require('dotenv');
-dotenv.config( {path: path.resolve('.env-web')});
+dotenv.config();
 
 const DIST_DIR = './src/dist';
 // const DEV_DIR = './src/client';
@@ -61,10 +61,7 @@ app.get('/api/v1/user/:userId', (req, res) => {
     force.query(req, res, soql);
 });
 
-app.get('/api/v1/accounts', (req, res) => {
-    const soql = `SELECT Id, Name, Type FROM Account LIMIT 100`;
-    force.query(req, res, soql);
-});
+
 
 app.post('/api/v1/event/new', convertToRecord, (req, res) => {
     force.create(req, res);

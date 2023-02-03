@@ -1,18 +1,20 @@
-export const UserQuery = (username='') => {
+export const UserQuery = (params = { username: '' , password: ''}) => {
+    const { username, password } = params;
     return {
         query: `{
             login( 
               credentials : {
                 username:"${username}", 
-                password:"",
+                password:"${password}",
                 securityToken:"",
                 instanceUrl:""
               }){
                 userId,
                 organizationId,
                 instanceUrl,
-                accessToken,
+                lightningUrl,
                 loginUrl,
+                accessToken,
                 loggedInUser{ Id Name FirstName LastName Email FullPhotoUrl LanguageLocaleKey LastLoginDate }
             }
           }`
@@ -23,7 +25,16 @@ export const AuthQuery = () => {
         query: `{
             login {
                 userId,
-                loggedInUser{ Id Name Email FullPhotoUrl LanguageLocaleKey LastLoginDate }
+                loggedInUser{ Id Name FirstName LastName  Email FullPhotoUrl LanguageLocaleKey LastLoginDate }
+            }
+          }`
+    };
+}
+export const UserDataQuery = () => {
+    return {
+        query: `{
+            getUser {
+                Id Name FirstName LastName  Email FullPhotoUrl LanguageLocaleKey LastLoginDate
             }
           }`
     };

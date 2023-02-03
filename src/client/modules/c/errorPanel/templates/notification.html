@@ -1,0 +1,35 @@
+<template>
+    <div class="slds-notify_container slds-is-relative">
+        <div class={severityClass} role="status">
+            <span class="slds-assistive-text">info</span>
+            <span
+                class="slds-icon_container slds-icon-utility-info slds-m-right_small slds-no-flex slds-align-top"
+                title="Description of icon when needed"
+            >
+                <lightning-icon
+                    size="large"
+                    variant="warning"
+                    icon-name="utility:warning"
+                ></lightning-icon>
+            </span>
+            <div class="slds-notify__content slds-scrollable">
+                <h2 class="slds-text-heading_small">{friendlyMessage}</h2>
+                <template for:each={errorMessages} for:item="message">
+                    <p class="slds-text-body_regular" key={message}>
+                        {message}
+                    </p>
+                </template>
+            </div>
+            <div class="slds-notify__close">
+                <lightning-button-icon
+                    title="close"
+                    name="close"
+                    size="large"
+                    icon-name="utility:close"
+                    onclick={handleClose}
+                >
+                </lightning-button-icon>
+            </div>
+        </div>
+    </div>
+</template>
