@@ -15,8 +15,8 @@ const NAV_ACTIONS = [
         iconName: 'utility:event'
     },
     {
-        name: '/sfdxPage',
-        label: 'SFDX',
+        name: '/org',
+        label: 'Org Data',
         iconName: 'utility:settings'
     }
 ];
@@ -54,7 +54,7 @@ export default class App extends LightningElement {
     orgId;
     activeUserId = '';
     @track _currentUser;
-
+    numberOfHours = 0;
     connectedCallback() {
         console.log('app path ' + this.pathName);
         this.loggedIn = this.getUserDetailsFromSessionStorage();
@@ -71,9 +71,25 @@ export default class App extends LightningElement {
         this.orgId = window.sessionStorage.getItem('orgId');
         const userObj = window.sessionStorage.getItem('sf_user');
         this._currentUser = userObj ? JSON.parse(userObj) : null;
+        const timstamp = window.sessionStorage.getItem('sf_login_timestamp');
+        this.numberOfHours = this.hoursSince(timstamp);
         return this.accessToken ? true : false;
     }
-
+    hoursSince(inputDate) {
+        var currentDate = new Date();
+        var differenceInMs = currentDate - new Date(inputDate);
+        var differenceInSeconds = differenceInMs / 1000;
+        var hours = Math.floor(differenceInSeconds / 3600);
+        var minutes = Math.floor((differenceInSeconds % 3600) / 60);
+        var seconds = Math.floor(differenceInSeconds % 60);
+        return `${hours
+            .toString()
+            .padStart(2, '0')} hs ${minutes
+            .toString()
+            .padStart(2, '0')} mins and ${seconds
+            .toString()
+            .padStart(2, '0')} ago`;
+    }
     // Site Navigationg links
     handleLinkClick(event) {
         event.preventDefault();
@@ -140,9 +156,12 @@ export default class App extends LightningElement {
 
     /* User Notifier */
     handleUpdateUser(event) {
+        const { actionName } = event.detail;
         this._currentUser = event.detail.currentUser;
-        console.log('currentUser ' + JSON.stringify(this.currentUser));
-        this.loggedIn = true;
+        console.log('refreshed - ' + actionName);
+        if (actionName === 'login') {
+            this.loggedIn = this.getUserDetailsFromSessionStorage();
+        }
     }
     handleLogout(event) {
         const isLoggedOut = event.detail;
@@ -173,9 +192,9 @@ export default class App extends LightningElement {
         const grid = this.template.querySelector('.header-bar');
         const grid_dir = this.isMenuOpen ? 'column' : 'row';
         const grid_width = this.isMenuOpen ? '60%' : '20%';
-        const grid_height = this.isMenuOpen ? '50%' : '4rem';
+        const grid_height = this.isMenuOpen ? '50%' : '5rem';
         grid.style.setProperty('--topbar-direction', grid_dir);
-        grid.style.setProperty('--topbar-menu-width', grid_width);
+        grid.style.setProperty('--topbar-menu-item-width', grid_width);
         grid.style.setProperty('--topbar-height', grid_height);
         grid.style.setProperty(
             '--topbar-display',

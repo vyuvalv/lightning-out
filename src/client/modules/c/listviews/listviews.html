@@ -1,26 +1,50 @@
 <template>
+    <div if:true={errors} class="user-form-errors">
+        <c-error-panel
+            errors={errors}
+            friendly-message={errorTitle}
+            type="toast"
+            severity={errorType}
+            onclose={handleCloseErrors}
+        ></c-error-panel>
+    </div>
     <div class="slds-grid">
         <lightning-combobox
-        name="objects"
-        label="Object Name"
-        value={selectedObjectName}
-        placeholder="Select Progress"
-        options={objectOptions}
-        onchange={handleSelectedObject}
-        required
-></lightning-combobox>
-        <lightning-combobox if:true={listViewsOptions.length}
-        name="listviews"
-        label="List view Name"
-        value={selectedlistViewId}
-        placeholder="Select ListView"
-        options={listViewsOptions}
-        onchange={handleSelectedListView}
-        required
-></lightning-combobox>
-<div if:true={listViewDetails}  class="slds-p-around_small">
-    <lightning-textarea value={listViewDetails}></lightning-textarea>
-</div>
-
+            class="slds-p-around_small"
+            name="objects"
+            label="Object Name"
+            value={selectedObjectName}
+            placeholder="Select Progress"
+            options={objectOptions}
+            onchange={handleSelectedObject}
+            required
+        ></lightning-combobox>
+        <div class="slds-p-around_small">
+            <lightning-spinner
+                if:true={loading}
+                class="slds-is-relative"
+                size="medium"
+                variant="brand"
+                alternative-text="loading"
+            >
+            </lightning-spinner>
+            <lightning-combobox
+                if:true={listViewsOptions.length}
+                name="listviews"
+                label="List view Name"
+                value={selectedlistViewId}
+                placeholder="Select ListView"
+                options={listViewsOptions}
+                onchange={handleSelectedListView}
+                required
+            ></lightning-combobox>
+        </div>
+    </div>
+    <div if:true={selectedlistViewId}>
+        <c-listview
+            object-name={selectedObjectName}
+            list-view-id={selectedlistViewId}
+            onerror={handleErrors}
+        ></c-listview>
     </div>
 </template>

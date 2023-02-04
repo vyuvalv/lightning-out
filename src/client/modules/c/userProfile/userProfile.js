@@ -94,7 +94,7 @@ export default class UserProfile extends LightningElement {
         }));
         this.currentUserLanguage = LANG_LABELS[this.currentUserLanguageKey];
 
-        if (this.loggedIn) {
+        if (this.loggedIn && this.activeUserId) {
             this.handleRefreshUser(false);
         }
     }
@@ -367,7 +367,7 @@ export default class UserProfile extends LightningElement {
                 this._currentUser = details;
                 this.loading = false;
                 this._readonly = true;
-                this.publishUser();
+                this.publishUser('refresh');
             } else {
                 console.error(
                     'error getting user: ' + JSON.stringify(response.errors)
@@ -417,7 +417,7 @@ export default class UserProfile extends LightningElement {
                 this._readonly = true;
                 this._loggedIn = true;
                 // Store User Details locally on parent
-                this.publishUser();
+                this.publishUser('login');
             } else {
                 this.showErrorPanel(
                     response.errors,
@@ -453,7 +453,7 @@ export default class UserProfile extends LightningElement {
                 this._currentUser = response.data.updateUser;
                 this._readonly = true;
                 this.loading = false;
-                this.publishUser();
+                this.publishUser('update');
             } else {
                 this.showErrorPanel(
                     response.errors,
@@ -468,11 +468,11 @@ export default class UserProfile extends LightningElement {
         }
     }
 
-    publishUser() {
+    publishUser(actionName = 'update') {
         this.errors = null;
         this.dispatchEvent(
             new CustomEvent('userupdate', {
-                detail: { currentUser: this.user }
+                detail: { currentUser: this.user, actionName }
             })
         );
     }

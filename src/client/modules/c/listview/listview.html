@@ -1,0 +1,45 @@
+<template>
+    <div if:true={listViewDetails} class="listview-table slds-scrollable">
+        <table
+            class="slds-table slds-table_cell-buffer slds-table_bordered"
+            aria-labelledby="element-with-table-label other-element-with-table-label"
+        >
+            <thead>
+                <tr class="slds-line-height_reset">
+                    <template
+                        if:true={columns}
+                        for:each={columns}
+                        for:item="column"
+                    >
+                        <th key={column.fieldName} class="" scope="col">
+                            <div class="slds-truncate" title={column.label}>
+                                {column.label}
+                            </div>
+                        </th>
+                    </template>
+                </tr>
+            </thead>
+            <tbody>
+                <template
+                    if:true={records}
+                    for:each={records}
+                    for:item="record"
+                >
+                    <tr key={record.index} class="slds-hint-parent">
+                        <template for:each={record.fields} for:item="field">
+                            <th
+                                key={field.fieldNameOrPath}
+                                data-label={field.fieldNameOrPath}
+                                scope="row"
+                            >
+                                <div class="slds-truncate" title={field.value}>
+                                    {field.value}
+                                </div>
+                            </th>
+                        </template>
+                    </tr>
+                </template>
+            </tbody>
+        </table>
+    </div>
+</template>

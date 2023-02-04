@@ -10,8 +10,11 @@ export const AllObjectsQuery = () => {
             }
           }`
     };
-}
-export const ListViewsDetailsQuery = (objectName="Account", listViewId='') => {
+};
+export const ListViewsDetailsQuery = (
+    objectName = 'Account',
+    listViewId = ''
+) => {
     return {
         query: `{
             getListViewDetails(
@@ -27,15 +30,18 @@ export const ListViewsDetailsQuery = (objectName="Account", listViewId='') => {
                   label
                 }
                 records{
-                  fieldNameOrPath
-                  value
+                  index
+                  fields{
+                    fieldNameOrPath
+                    value
+                  }
                 }
               }
           }`
     };
-}
+};
 
-export const ListViewsQuery = (objectName="Account") => {
+export const ListViewsQuery = (objectName = 'Account') => {
     return {
         query: `{
             getListViews(objectName: "${objectName}") {
@@ -48,4 +54,4 @@ export const ListViewsQuery = (objectName="Account") => {
             }
           }`
     };
-}
+};

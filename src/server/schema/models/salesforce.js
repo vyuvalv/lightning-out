@@ -76,6 +76,14 @@ const ColumnItem = new GraphQLObjectType({
         value: { type: GraphQLString }
     })
 });
+const RecordItem = new GraphQLObjectType({
+    name: 'RecordItem',
+    description: 'Record Item',
+    fields: () => ({
+        index: { type: GraphQLInt },
+        fields: { type: new GraphQLList(ColumnItem) }
+    })
+});
 const ListViewItem = new GraphQLObjectType({
     name: 'ListViewItem',
     description: 'ListViews Item',
@@ -84,7 +92,7 @@ const ListViewItem = new GraphQLObjectType({
         developerName: { type: GraphQLString },
         label: { type: GraphQLString },
         columns: { type: new GraphQLList(ColumnItem) },
-        records: { type: new GraphQLList(ColumnItem) }
+        records: { type: new GraphQLList(RecordItem) }
     })
 });
 

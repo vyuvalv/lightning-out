@@ -57,3 +57,34 @@ export const UpdateUserQuery = (record = `{ FirstName: "Y"}`) => {
             }`
     };
 };
+
+/* List Views */
+export const ListViewsDetailsQuery = (
+    objectName = 'Account',
+    listViewId = ''
+) => {
+    return {
+        query: `{
+            getListViewDetails(
+                objectName:"${objectName}", 
+                listViewId:"${listViewId}"
+              ){
+                  id
+                  developerName
+                  label
+                columns{
+                  fieldNameOrPath
+                  type
+                  label
+                }
+                records{
+                  index
+                  fields{
+                    fieldNameOrPath
+                    value
+                  }
+                }
+              }
+          }`
+    };
+};

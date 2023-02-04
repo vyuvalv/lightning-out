@@ -141,6 +141,7 @@ const RootQuery = new GraphQLObjectType({
             async resolve(parentValue, args, context) {
                 const { userId, refresh } = args;
                 if (!refresh && activeUser) {
+                    console.log('Refreshed user from Cache.. ');
                     return activeUser;
                 }
                 // Update DB
@@ -278,11 +279,25 @@ const RootQuery = new GraphQLObjectType({
                                 );
                                 // throw new Error(`${err.name} : ${err.message}`);
                             }
-
-                            const records = res.records.map(rec => rec.columns);
+                            let records = [];
+                            res.records.forEach((rec, ind) => {
+                                records.push({
+                                    index: ind,
+                                    fields: rec.columns
+                                });
+                                console.log(
+                                    'rec.columns ' +
+                                        JSON.stringify({
+                                            index: ind,
+                                            fields: rec.columns
+                                        })
+                                );
+                            });
+                            // console.log('res.records ' + records.length);
+                            //let records = res.records.map(rec => rec.columns);
                             response = {
                                 ...res,
-                                records: records[0]
+                                records: records
                             };
                             return response;
                         });
@@ -380,6 +395,7 @@ async function loginToOrg(sfUrl, username, password, securityToken) {
                 organizationId = userInfo.organizationId;
                 orgUrl = userInfo.url;
                 console.log('accessToken : ' + accessToken);
+                console.log('currentUserId : ' + currentUserId);
                 // Build login response
                 authObject = {
                     userId: currentUserId,
@@ -412,7 +428,7 @@ async function getCurrentUser(userId, sessionId, serverUrl) {
                 throw new Error(`Failed to get User => ${err.message}`);
             }
             if (res.records) {
-                console.log(`refreshed User ... ${userId}`);
+                console.log(`Refreshed User from Salesforce ... ${userId}`);
                 output = { ...res.records[0] };
             }
             return output;

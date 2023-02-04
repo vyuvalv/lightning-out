@@ -1,8 +1,8 @@
 import { LightningElement, track } from 'lwc';
 import { getData } from 'data/services';
-import { AllObjectsQuery, ListViewsQuery, ListViewsDetailsQuery } from './data/ql-queries';
+import { AllObjectsQuery, ListViewsQuery } from './data/ql-queries';
 
-export default class ListViews extends LightningElement { 
+export default class ListViews extends LightningElement {
     @track _objectOptions;
     @track _listviews;
     @track _listViewDetails;
@@ -10,92 +10,102 @@ export default class ListViews extends LightningElement {
     selectedlistViewId;
     selectedObjectName;
 
-    @track _columns; 
-    @track _records;
+    errors;
+    errorTitle = 'Error';
+    errorType = 'error';
 
     connectedCallback() {
         this.getAllObjects();
     }
     get objectOptions() {
-        return this._objectOptions ? this._objectOptions.map(opt => ({ value: opt.name, label: opt.label })):[];
+        return this._objectOptions
+            ? this._objectOptions.map(opt => ({
+                  value: opt.name,
+                  label: opt.label
+              }))
+            : [];
     }
     get listViewsOptions() {
-        return this._listviews ? this._listviews.map(opt => ({ value: opt.id, label: opt.label })):[];
+        return this._listviews
+            ? this._listviews.map(opt => ({ value: opt.id, label: opt.label }))
+            : [];
     }
     get listViewDetails() {
-        return this._listViewDetails ? JSON.stringify(this._listViewDetails) : '';
+        return this._listViewDetails
+            ? JSON.stringify(this._listViewDetails)
+            : '';
     }
 
     handleSelectedObject(event) {
         this.selectedObjectName = event.detail.value;
         console.log('objName : ' + this.selectedObjectName);
-        this.getListViews( this.selectedObjectName );
+        this.getListViews(this.selectedObjectName);
     }
     handleSelectedListView(event) {
         this.selectedlistViewId = event.detail.value;
         console.log('listViewId : ' + this.selectedlistViewId);
-        this.getListViewDetails( this.selectedObjectName,  this.selectedlistViewId );
+        // this.getListViewDetails( this.selectedObjectName,  this.selectedlistViewId );
     }
     async getAllObjects() {
         this.loading = true;
         const graphQuery = AllObjectsQuery();
         try {
             const response = await getData(graphQuery);
-            if (response){
+            if (response.data.getAllObjects) {
                 this._objectOptions = response.data.getAllObjects.sobjects;
-                console.log('response getAllObjects :', response);
+                // console.log('response getAllObjects :', response);
                 this.loading = false;
+            } else {
+                this.showErrorPanel(
+                    response.errors,
+                    'Failed to get Objects..',
+                    'error'
+                );
             }
-        }
-        catch (error) {
+        } catch (error) {
             console.log(`error ${error.message}`);
+            this.showErrorPanel(error, 'Logged Out', 'error');
         }
     }
-
+    handleErrors(event) {
+        this.showErrorPanel(
+            event.detail,
+            'Failed to get List View Details..',
+            'error'
+        );
+    }
     async getListViews(objectName) {
         this.loading = true;
         const graphQuery = ListViewsQuery(objectName);
         try {
             const response = await getData(graphQuery);
-            if (response) {
-                console.log('response ListViewsQuery :', response);
+            if (response.data.getListViews) {
+                console.log(
+                    'response ListViewsQuery :',
+                    response.data.getListViews
+                );
                 this._listviews = response.data.getListViews.listviews;
-                this._columns = response.data.getListViews.listviews.columns;
-                this._records = response.data.getListViews.listviews.records;
+
                 this.loading = false;
+            } else {
+                this.showErrorPanel(
+                    response.errors,
+                    'Failed to get ListViews..',
+                    'error'
+                );
             }
-        }
-        catch (error) {
+        } catch (error) {
             console.log(`error ${error.message}`);
-        }
-    }
-    async getListViewDetails(objectName, listViewId) {
-        this.loading = true;
-        const graphQuery = ListViewsDetailsQuery(objectName, listViewId);
-        try {
-            const response = await getData(graphQuery);
-            if (response){
-                this._listViewDetails = response.data.getListViewDetails;
-                console.log('response _listViewDetails :', response);
-                this.loading = false;
-            }
-        }
-        catch (error) {
-            console.log(`error ${error.message}`);
+            this.showErrorPanel(error, 'Not able to get list views', 'error');
         }
     }
 
-    get columns() {
-        return this._columns.map(item => ({
-            label: item.label,
-            fieldName: item.fieldNameOrPath,
-            type: 'text'
-        }));
+    showErrorPanel(messages, title = 'error', severity = 'error') {
+        this.errors = messages;
+        this.errorTitle = title;
+        this.errorType = severity;
     }
-    get records() {
-        return this._records.map(item => ({
-            [item.fieldNameOrPath]:item.value
-        }));
+    handleCloseErrors() {
+        this.errors = false;
     }
-
 }
