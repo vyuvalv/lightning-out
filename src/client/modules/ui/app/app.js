@@ -78,6 +78,10 @@ export default class App extends LightningElement {
     handleLinkClick(event) {
         event.preventDefault();
         const actionName = event.target.dataset.name;
+        if (this.isMenuOpen) this.handleToggleHamburgerMenu();
+        if (this.userPanelOpen) {
+            this.userPanelOpen = false;
+        }
         this.addToBrowserHistory(actionName);
     }
 
@@ -116,15 +120,6 @@ export default class App extends LightningElement {
                 : 'Log in to Org'
         };
     }
-    // On click handler
-    toggleUserPanel() {
-        this.loggedIn = this.getUserDetailsFromSessionStorage();
-        this.userPanelOpen = !this.userPanelOpen;
-    }
-    // On click close handler
-    handleCloseUserPanel() {
-        this.userPanelOpen = false;
-    }
 
     renderLightningOut() {
         console.log('post message to: ' + TARGET_SERVER);
@@ -159,20 +154,40 @@ export default class App extends LightningElement {
     get currentUser() {
         return this._currentUser ? this._currentUser : '';
     }
-
+    // On click handler
+    toggleUserPanel() {
+        this.loggedIn = this.getUserDetailsFromSessionStorage();
+        this.userPanelOpen = !this.userPanelOpen;
+        // Close menu if open
+        if (this.isMenuOpen) {
+            this.handleToggleHamburgerMenu();
+        }
+    }
+    // On click close handler
+    handleCloseUserPanel() {
+        this.userPanelOpen = false;
+    }
     /* Mobile Menu Support */
     handleToggleHamburgerMenu() {
         this.isMenuOpen = !this.isMenuOpen;
         const grid = this.template.querySelector('.header-bar');
         const grid_dir = this.isMenuOpen ? 'column' : 'row';
-        const grid_width = this.isMenuOpen ? '100%' : '20%';
+        const grid_width = this.isMenuOpen ? '60%' : '20%';
         const grid_height = this.isMenuOpen ? '50%' : '4rem';
         grid.style.setProperty('--topbar-direction', grid_dir);
         grid.style.setProperty('--topbar-menu-width', grid_width);
         grid.style.setProperty('--topbar-height', grid_height);
+        grid.style.setProperty(
+            '--topbar-display',
+            this.isMenuOpen ? 'flex' : 'none'
+        );
         grid.classList.toggle('header-bar-mobile');
+        // Close other open modals
+        if (this.isMenuOpen) {
+            this.userPanelOpen = false;
+        }
     }
-
+    /* Hamburger Menu Icon toggle */
     get hamburgerMenuIcon() {
         return this.isMenuOpen ? 'utility:close' : 'utility:justify_text';
     }
