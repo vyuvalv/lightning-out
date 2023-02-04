@@ -35,8 +35,9 @@
                     variant={loginButton.variant}
                     size="small"
                 ></lightning-icon>
-                <div class="slds-p-horizontal_x-small">
+                <div class="slds-p-horizontal_x-small slds-text-body_small">
                     <p if:true={currentUser}>{currentUser.Name}</p>
+                    <p>{numberOfHours}</p>
                     <p>{loginButton.label}</p>
                 </div>
             </div>
@@ -51,6 +52,27 @@
             ></lightning-button-icon>
         </div>
     </div>
+
+    <!-- Main Preview -->
+    <div class="web-grid-container">
+        <div class="web-content">
+            <!-- Loading -->
+            <lightning-spinner
+                if:true={loading}
+                variant="brand"
+                alternative-text="loading.."
+            ></lightning-spinner>
+
+            <!-- Content -->
+            <ui-content-body
+                hide={lwcOutIsRendered}
+                path-name={pathName}
+                onpublish={toggleUserPanel}
+            ></ui-content-body>
+        </div>
+    </div>
+
+    <!-- Modal -->
     <div class="user-login-panel slds-nubbin_top-right" if:true={userPanelOpen}>
         <!-- Close User Panel -->
         <lightning-button-icon
@@ -71,24 +93,4 @@
         </div>
     </div>
     <div if:true={isMenuOpen} class="web-backdrop"></div>
-    <!-- Main Preview -->
-    <div class="web-grid-container">
-        <div class="web-content">
-            <!-- Loading -->
-            <lightning-spinner
-                if:true={loading}
-                variant="brand"
-                alternative-text="loading.."
-            ></lightning-spinner>
-
-            <!-- Content -->
-            <ui-content-body
-                hide={lwcOutIsRendered}
-                path-name={pathName}
-                onpublish={toggleUserPanel}
-            ></ui-content-body>
-        </div>
-    </div>
-
-    <!-- END -->
 </template>
