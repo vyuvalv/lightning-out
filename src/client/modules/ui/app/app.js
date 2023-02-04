@@ -21,7 +21,7 @@ const NAV_ACTIONS = [
     }
 ];
 // Server Endpoint
-const IS_DEV = true;
+const IS_DEV = false;
 const SERVER_URL = `https://test-service-skwt.onrender.com`;
 const DEV_SERVER = `http://localhost:3001`;
 const TARGET_SERVER = IS_DEV ? DEV_SERVER : SERVER_URL;

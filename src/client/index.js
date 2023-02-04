@@ -4,7 +4,7 @@ import '@lwc/synthetic-shadow';
 import { createElement } from 'lwc';
 import MainApp from 'ui/app';
 
-const IS_DEV = true;
+const IS_DEV = false;
 const DEV_SERVER = `http://localhost:3001`;
 const SERVER_URL = `https://test-service-skwt.onrender.com`;
 const TARGET_SERVER = IS_DEV ? DEV_SERVER : SERVER_URL;
