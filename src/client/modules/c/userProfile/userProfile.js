@@ -469,6 +469,7 @@ export default class UserProfile extends LightningElement {
     }
 
     publishUser() {
+        this.errors = null;
         this.dispatchEvent(
             new CustomEvent('userupdate', {
                 detail: { currentUser: this.user }

@@ -77,17 +77,13 @@ const AuthResponse = new GraphQLObjectType({
         loggedInUser: {
             type: UserObject,
             async resolve(parentValue, args, context) {
-                // Cached
-                if (activeUser) {
-                    return activeUser;
-                }
                 // Update DB User
                 activeUser = await getCurrentUser(
                     parentValue.userId,
                     parentValue.accessToken,
                     parentValue.loginUrl
                 );
-                return { ...activeUser };
+                return activeUser;
             }
         }
     })
